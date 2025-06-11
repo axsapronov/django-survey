@@ -15,7 +15,7 @@
 	{% if form.field.widget.attrs.category == category.name or category.name == 'No category' and not form.field.widget.attrs.category %}
         <tr class="{% if form.errors%} danger {% endif %}">
             <td>
-                {% if 'crispy_forms'|is_installed %}
+                {% if 'crispy_forms'|is_installed_app %}
                     {{ form|crispy }}
                 {% else %}
                     {{ form.label|safe }}
