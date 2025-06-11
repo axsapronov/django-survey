@@ -69,10 +69,6 @@ optional-dependencies.sankey = [
 urls."Bug Tracker" = "https://github.com/Pierre-Sassoulas/django-survey/issues"
 urls."Source Code" = "https://github.com/Pierre-Sassoulas/django-survey"
 
-[tool.poetry]
-package-mode = true
-packages = [ { include = "survey" } ]
-
 [tool.setuptools.packages.find]
 include = [ "survey*" ]
 
