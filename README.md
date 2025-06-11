@@ -54,7 +54,7 @@ echo 'django-survey-and-report' >> requirements.txt
 pip install -r requirements.txt
 ```
 
-Add `bootstrapform` and `survey` in the `INSTALLED_APPS` in your settings :
+Add `survey` in the `INSTALLED_APPS` in your settings :
 
 ```python
 INSTALLED_APPS = [
@@ -67,12 +67,29 @@ CSV_DIRECTORY = Path("csv") # Define the directory where csv are exported
 TEX_DIRECTORY = Path("tex") # Define the directory where tex files and pdf are exported
 
 INSTALLED_APPS += [
-	'bootstrapform',
 	'survey'
 ]
 ```
 
-Add a URL entry to your project’s urls.py, for example:
+For improved form rendering you can use django-crispy-forms. To do this, install the optional dependencies:
+
+```bash
+pip install django-survey-and-report[crispy]
+```
+
+Add apps in the `INSTALLED_APPS` in your settings:
+
+```python
+INSTALLED_APPS += [
+    'crispy_forms',
+    'crispy_bootstrap5',
+]
+
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
+CRISPY_TEMPLATE_PACK = "bootstrap5"
+```
+
+Add a URL entry to your project's urls.py, for example:
 
 ```python
 from django.conf import settings
@@ -122,8 +139,7 @@ To uninstall `django-survey-and-report`, simply comment out or remove the 'surve
 in your `INSTALLED_APPS`.
 
 If you want to use the pdf rendering you need to install `xelatex`. If you're using the
-Sankey's diagram generation you will also have to install `python-tk` (for python 2.7)
-or `python3-tk` (for python 3.x).
+Sankey's diagram generation you will also have to install `python3-tk`.
 
 ## Making a survey
 

@@ -1,4 +1,5 @@
 from django import template
+from django.conf import settings
 
 register = template.Library()
 
@@ -30,3 +31,13 @@ class CounterNode(template.Node):
 @register.tag
 def counter(parser, token):
     return CounterNode()
+
+
+@register.filter
+def is_installed_app(package_name):
+    """
+    Проверяет, установлен ли пакет в проекте
+    """
+    if package_name == "crispy_forms":
+        return "crispy_forms" in settings.INSTALLED_APPS
+    return False
