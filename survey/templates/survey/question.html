@@ -16,7 +16,7 @@
         <tr class="{% if form.errors%} danger {% endif %}">
             <td>
                 {% if 'crispy_forms'|is_installed_app %}
-                    {{ form|crispy }}
+                    {% crispy form %}
                 {% else %}
                     {{ form.label|safe }}
                     {% if form.field.required %}
