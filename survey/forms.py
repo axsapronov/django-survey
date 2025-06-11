@@ -67,6 +67,45 @@ class ResponseForm(models.ModelForm):
             for name in self.fields.keys():
                 self.fields[name].widget.attrs["disabled"] = True
 
+        # Добавляем атрибуты для crispy-forms
+        self.is_bound = bool(args and args[0])
+        self.data = args[0] if self.is_bound else None
+        self.files = args[1] if len(args) > 1 else None
+        self.initial = kwargs.get("initial", {})
+
+    def is_valid(self):
+        """
+        Returns True if the form has no errors. Otherwise, False. If errors are
+        being ignored, returns False.
+        """
+        return self.is_bound and not self.errors
+
+    def add_error(self, field, error):
+        """
+        Update the content of `self._errors`.
+        The `field` argument is the name of the field to which the errors
+        should be added. If it's None, treat the errors as NON_FIELD_ERRORS.
+        The `error` argument can be a single error, a list of errors, or a
+        dictionary that maps field names to lists of errors. What we define here
+        is a simplified version of what `django.forms.forms.BaseForm` does.
+        """
+        if not hasattr(self, "_errors"):
+            self._errors = forms.utils.ErrorDict()
+        if field is None:
+            field = forms.utils.NON_FIELD_ERRORS
+        if field not in self._errors:
+            self._errors[field] = forms.utils.ErrorList()
+        self._errors[field].extend(error)
+
+    @property
+    def errors(self):
+        """
+        Returns an ErrorDict for the data provided for the form
+        """
+        if not hasattr(self, "_errors"):
+            self._errors = forms.utils.ErrorDict()
+        return self._errors
+
     def add_questions(self, data):
         # add a field for each survey question, corresponding to the question
         # type as appropriate.
