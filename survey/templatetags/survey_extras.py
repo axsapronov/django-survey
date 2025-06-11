@@ -4,6 +4,16 @@ from django.conf import settings
 register = template.Library()
 
 
+class CounterNode(template.Node):
+    def __init__(self):
+        self.count = 0
+
+    def render(self, context):
+        self.count += 1
+        return self.count
+
+
+@register.filter
 def collapse_form(form, category):
     """Permit to return the class of the collapsible according to errors in
     the form."""
@@ -14,18 +24,6 @@ def collapse_form(form, category):
     if category.name in categories_with_error:
         return "in"
     return ""
-
-
-register.filter("collapse_form", collapse_form)
-
-
-class CounterNode(template.Node):
-    def __init__(self):
-        self.count = 0
-
-    def render(self, context):
-        self.count += 1
-        return self.count
 
 
 @register.tag

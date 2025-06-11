@@ -45,6 +45,14 @@ class ResponseForm(models.ModelForm):
             self.step = int(kwargs.pop("step"))
         except KeyError:
             self.step = None
+
+        # Initialize attributes for crispy-forms before calling super()
+        self._errors = forms.utils.ErrorDict()
+        self.is_bound = bool(args and args[0])
+        self.data = args[0] if self.is_bound else None
+        self.files = args[1] if len(args) > 1 else None
+        self.initial = kwargs.get("initial", {})
+
         super().__init__(*args, **kwargs)
         self.uuid = uuid.uuid4().hex
 
@@ -67,12 +75,6 @@ class ResponseForm(models.ModelForm):
             for name in self.fields.keys():
                 self.fields[name].widget.attrs["disabled"] = True
 
-        # Добавляем атрибуты для crispy-forms
-        self.is_bound = bool(args and args[0])
-        self.data = args[0] if self.is_bound else None
-        self.files = args[1] if len(args) > 1 else None
-        self.initial = kwargs.get("initial", {})
-
     def is_valid(self):
         """
         Returns True if the form has no errors. Otherwise, False. If errors are
@@ -89,8 +91,6 @@ class ResponseForm(models.ModelForm):
         dictionary that maps field names to lists of errors. What we define here
         is a simplified version of what `django.forms.forms.BaseForm` does.
         """
-        if not hasattr(self, "_errors"):
-            self._errors = forms.utils.ErrorDict()
         if field is None:
             field = forms.utils.NON_FIELD_ERRORS
         if field not in self._errors:
@@ -102,8 +102,6 @@ class ResponseForm(models.ModelForm):
         """
         Returns an ErrorDict for the data provided for the form
         """
-        if not hasattr(self, "_errors"):
-            self._errors = forms.utils.ErrorDict()
         return self._errors
 
     def add_questions(self, data):
