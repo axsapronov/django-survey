@@ -19,6 +19,12 @@ if the question type is 'radio', 'select', or
 options for this question ."""
 )
 
+CORRECT_ANSWER_HELP_TEXT = _(
+    """Optional. Set the correct answer for this question. 
+For multiple choice questions, use comma-separated values. 
+For text questions, provide the exact expected answer."""
+)
+
 
 def validate_choices(choices):
     """Verifies that there is at least two choices in choices
@@ -72,6 +78,7 @@ class Question(models.Model):
     survey = models.ForeignKey(Survey, on_delete=models.CASCADE, verbose_name=_("Survey"), related_name="questions")
     type = models.CharField(_("Type"), max_length=200, choices=QUESTION_TYPES, default=TEXT)
     choices = models.TextField(_("Choices"), blank=True, null=True, help_text=CHOICES_HELP_TEXT)
+    correct_answer = models.TextField(_("Correct Answer"), blank=True, null=True, help_text=CORRECT_ANSWER_HELP_TEXT)
 
     class Meta:
         verbose_name = _("question")
@@ -93,6 +100,17 @@ class Question(models.Model):
             if choice:
                 choices_list.append(choice)
         return choices_list
+
+    def get_clean_correct_answer(self):
+        """Return split and stripped list of correct answers with no null values."""
+        if self.correct_answer is None:
+            return []
+        correct_answers_list = []
+        for answer in self.correct_answer.split(settings.CHOICES_SEPARATOR):
+            answer = answer.strip()
+            if answer:
+                correct_answers_list.append(answer)
+        return correct_answers_list
 
     @property
     def answers_as_text(self):

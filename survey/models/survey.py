@@ -27,6 +27,7 @@ class Survey(models.Model):
     is_published = models.BooleanField(_("Users can see it and answer it"), default=True)
     need_logged_user = models.BooleanField(_("Only authenticated users can see it and answer it"))
     editable_answers = models.BooleanField(_("Users can edit their answers afterwards"), default=True)
+    multiple_responses = models.BooleanField(_("Allow multiple responses from same user"), default=False)
     display_method = models.SmallIntegerField(
         _("Display method"), choices=DISPLAY_METHOD_CHOICES, default=ALL_IN_ONE_PAGE
     )

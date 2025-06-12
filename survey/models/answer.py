@@ -6,6 +6,7 @@ field sizes depending on the actual question this answer corresponds to any
 
 import logging
 
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.text import slugify
@@ -38,62 +39,75 @@ class Answer(models.Model):
     def values(self):
         if self.body is None:
             return [None]
-        if len(self.body) < 3 or self.body[0:3] != "[u'":
+        if not self.body.startswith("[") or not self.body.endswith("]"):
             return [self.body]
-        # We do not use eval for security reason but it could work with :
-        # eval(self.body)
-        # It would permit to inject code into answer though.
-        values = []
-        raw_values = self.body.split("', u'")
-        nb_values = len(raw_values)
-        for i, value in enumerate(raw_values):
-            if i == 0:
-                value = value[3:]
-            if i + 1 == nb_values:
-                value = value[:-2]
-            values.append(value)
-        return values
+        return [x.replace("'", "") for x in self.body[1:-1].split(settings.CHOICES_SEPARATOR)]
 
-    def check_answer_body(self, question, body):
-        if question.type in [Question.RADIO, Question.SELECT, Question.SELECT_MULTIPLE]:
-            choices = question.get_clean_choices()
-            self.check_answer_for_select(choices, body)
-        if question.type == Question.INTEGER and body and body != "":
+    def _validate_value(self, value, question_type, choices=None):
+        """
+        Общий метод для валидации значения в зависимости от типа вопроса.
+
+        Args:
+            value: Значение для проверки
+            question_type: Тип вопроса
+            choices: Список допустимых вариантов ответа (для вопросов с выбором)
+
+        Returns:
+            bool: True если значение валидно
+
+        Raises:
+            ValidationError: Если значение невалидно
+        """
+        if not value:
+            return True
+
+        if question_type in [Question.RADIO, Question.SELECT, Question.SELECT_MULTIPLE]:
+            if choices and value not in choices:
+                msg = f"Impossible answer '{value}' should be in {choices}"
+                raise ValidationError(msg)
+            return True
+
+        if question_type == Question.INTEGER:
             try:
-                body = int(body)
+                int(value)
+                return True
             except ValueError as e:
                 msg = "Answer is not an integer"
                 raise ValidationError(msg) from e
-        if question.type == Question.FLOAT and body and body != "":
+
+        if question_type == Question.FLOAT:
             try:
-                body = float(body)
+                float(value)
+                return True
             except ValueError as e:
                 msg = "Answer is not a number"
                 raise ValidationError(msg) from e
 
-    def check_answer_for_select(self, choices, body):
-        answers = []
-        if body:
-            if body[0] == "[":
-                for i, part in enumerate(body.split("'")):
-                    if i % 2 == 1:
-                        answers.append(part)
-            else:
-                answers = [body]
-        for answer in answers:
-            if answer not in choices:
-                msg = f"Impossible answer '{body}'"
-                msg += f" should be in {choices} "
-                raise ValidationError(msg)
+        return True
+
+    def check_answer_body(self, question, body):
+        """Валидация ответа при создании"""
+        if question.type in [Question.RADIO, Question.SELECT, Question.SELECT_MULTIPLE]:
+            choices = question.get_clean_choices()
+            answers = []
+            if body:
+                if body[0] == "[":
+                    for i, part in enumerate(body.split("'")):
+                        if i % 2 == 1:
+                            answers.append(part)
+                else:
+                    answers = [body]
+            for answer in answers:
+                self._validate_value(answer, question.type, choices)
+        else:
+            self._validate_value(body, question.type)
 
     @property
     def is_correct(self) -> bool:
         """
         Checks the correctness of the answer depending on the question type.
-        Takes into account data storage features:
-        - Values can be in lowercase
-        - Spaces can be replaced with hyphens
-        - Multiple answers are stored in list format
+        If the question has a correct_answer defined, compares with it.
+        Otherwise uses the default logic for checking answer validity.
 
         Returns:
             bool: True if the answer is correct, False otherwise
@@ -101,41 +115,63 @@ class Answer(models.Model):
         if not self.body:
             return not self.question.required
 
+        if self.question.correct_answer:
+            return self._check_against_correct_answer()
+
+        return True
+
+    def _check_against_correct_answer(self) -> bool:
+        """
+        Сравнивает ответ пользователя с корректным ответом, заданным в вопросе.
+        """
         try:
-            # Get list of valid answer choices
-            choices = self.question.get_clean_choices()
             answer_values = self.values
+            correct_answers = self.question.get_clean_correct_answer()
 
-            # For questions with answer choices
-            if self.question.type in [Question.RADIO, Question.SELECT, Question.SELECT_MULTIPLE]:
-                # Check that all answer values are in the list of valid choices
-                return all(
-                    any(slugify(value, allow_unicode=True) == slugify(choice, allow_unicode=True) for choice in choices)
-                    for value in answer_values
-                )
+            if not correct_answers:
+                return False
 
-            # For numeric questions
-            if self.question.type == Question.INTEGER:
-                try:
-                    return all(int(value) for value in answer_values)
-                except ValueError:
-                    return False
-
-            if self.question.type == Question.FLOAT:
-                try:
-                    return all(float(value) for value in answer_values)
-                except ValueError:
-                    return False
-
-            # For text questions - we consider the answer correct if it is not empty
+            # Для текстовых вопросов
             if self.question.type in [Question.TEXT, Question.SHORT_TEXT]:
-                return all(bool(value.strip()) for value in answer_values)
+                user_answer = answer_values[0].strip().lower() if answer_values else ""
+                correct_answer = correct_answers[0].strip().lower()
+                return user_answer == correct_answer
 
-            # For other question types
-            return True
+            # Для числовых вопросов
+            if self.question.type in [Question.INTEGER, Question.FLOAT]:
+                try:
+                    user_value = float(answer_values[0]) if answer_values else None
+                    correct_value = float(correct_answers[0])
+                    if self.question.type == Question.INTEGER:
+                        return int(user_value) == int(correct_value)
+                    return abs(user_value - correct_value) < 1e-9
+                except (ValueError, IndexError):
+                    return False
+
+            # Для вопросов с выбором
+            if self.question.type in [Question.RADIO, Question.SELECT, Question.SELECT_IMAGE]:
+                if not answer_values or len(correct_answers) != 1:
+                    return False
+                user_answer = slugify(answer_values[0].lower(), allow_unicode=True)
+                correct_answer = slugify(correct_answers[0].lower(), allow_unicode=True)
+                return user_answer == correct_answer
+
+            # Для вопросов с множественным выбором
+            if self.question.type == Question.SELECT_MULTIPLE:
+                user_answers = set(slugify(val.lower(), allow_unicode=True) for val in answer_values)
+                correct_answers_set = set(slugify(ans.lower(), allow_unicode=True) for ans in correct_answers)
+                return user_answers == correct_answers_set
+
+            # Для даты
+            if self.question.type == Question.DATE:
+                user_answer = answer_values[0].strip() if answer_values else ""
+                correct_answer = correct_answers[0].strip()
+                return user_answer == correct_answer
+
+            return False
 
         except Exception:
-            LOGGER.exception("Error checking answer correctness")
+            LOGGER.exception("Error checking answer against correct answer")
             return False
 
     def __str__(self):

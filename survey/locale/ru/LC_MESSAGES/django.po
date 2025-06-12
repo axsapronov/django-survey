@@ -209,11 +209,11 @@ msgstr ""
 
 #: survey/models/question.py:55
 msgid "text (multiple line)"
-msgstr "текст (многострочный)"
+msgstr "Текст (многострочный)"
 
 #: survey/models/question.py:56
 msgid "short text (one line)"
-msgstr "короткий текст (однострочный)"
+msgstr "Короткий текст (однострочный)"
 
 #: survey/models/question.py:57
 msgid "radio"
@@ -253,7 +253,7 @@ msgstr "Порядок"
 
 #: survey/models/question.py:68
 msgid "Required"
-msgstr "Требуемый"
+msgstr "Обязательный"
 
 #: survey/models/question.py:70
 msgid "Category"
@@ -314,6 +314,10 @@ msgstr "Только прошедшие проверку пользовател�
 #: survey/models/survey.py:29
 msgid "Users can edit their answers afterwards"
 msgstr "Пользователи могут редактировать свои ответы впоследствии"
+
+#: survey/models/survey.py:30
+msgid "Allow multiple responses from same user"
+msgstr "Разрешить многократное прохождение пользователям"
 
 #: survey/models/survey.py:31
 #, fuzzy
@@ -394,3 +398,44 @@ msgstr "Дальше!"
 #: survey/templates/survey/survey.html:73
 msgid "I'm done!"
 msgstr "Завершить!"
+
+#: survey/templates/survey/user_responses.html:4
+#: survey/templates/survey/user_responses.html:11
+msgid "Your responses to"
+msgstr "Ваши ответы на"
+
+#: survey/templates/survey/user_responses.html:16
+msgid "Take survey again"
+msgstr "Пройти опрос снова"
+
+#: survey/templates/survey/user_responses.html:23
+msgid "Date completed"
+msgstr "Дата завершения"
+
+#: survey/templates/survey/user_responses.html:24
+msgid "Last updated"
+msgstr "Последнее обновление"
+
+#: survey/templates/survey/user_responses.html:25
+msgid "Correct answers"
+msgstr "Правильные ответы"
+
+#: survey/templates/survey/user_responses.html:26
+msgid "Actions"
+msgstr "Действия"
+
+#: survey/templates/survey/user_responses.html:38
+msgid "No answers"
+msgstr "Нет ответов"
+
+#: survey/templates/survey/user_responses.html:43
+msgid "View/Edit"
+msgstr "Просмотр/Редактирование"
+
+#: survey/templates/survey/user_responses.html:51
+msgid "You haven't completed this survey yet."
+msgstr "Вы еще не проходили этот опрос."
+
+#: survey/templates/survey/user_responses.html:52
+msgid "Take it now"
+msgstr "Пройти сейчас"

@@ -1,0 +1,61 @@
+{% extends "survey/base.html" %}
+{% load i18n %}
+
+{% block title %}
+    {% trans "Your responses to" %} "{{ survey.name }}"
+{% endblock %}
+
+{% block body %}
+<div class="row">
+    <div class="col-md-12">
+        <h1>{% trans "Your responses to" %} "{{ survey.name }}"</h1>
+        
+        <div class="mb-3">
+            <a href="{% url 'survey-detail' id=survey.id %}" class="btn btn-primary">
+                {% trans "Take survey again" %}
+            </a>
+        </div>
+        
+        {% if object_list %}
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>{% trans "Date completed" %}</th>
+                            <th>{% trans "Last updated" %}</th>
+                            <th>{% trans "Correct answers" %}</th>
+                            <th>{% trans "Actions" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for object in object_list %}
+                        <tr>
+                            <td>{{ object.created|date:"d.m.Y H:i" }}</td>
+                            <td>{{ object.updated|date:"d.m.Y H:i" }}</td>
+                            <td>
+                                {% if object.total_answers_count > 0 %}
+                                    {{ object.correct_answers_count }} / {{ object.total_answers_count }} 
+                                    ({{ object.correct_answers_percentage}}%)
+                                {% else %}
+                                    {% trans "No answers" %}
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{% url 'survey-response-detail' response_id=object.id %}" class="btn btn-sm btn-outline-primary">
+                                    {% trans "View/Edit" %}
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                {% trans "You haven't completed this survey yet." %}
+                <a href="{% url 'survey-detail' id=survey.id %}">{% trans "Take it now" %}</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %} 

@@ -12,6 +12,15 @@ class QuestionInline(admin.StackedInline):
     model = Question
     ordering = ("order", "category")
     extra = 1
+    fields = (
+        "text",
+        "type",
+        "order",
+        "required",
+        "category",
+        "choices",
+        "correct_answer",
+    )
 
     def get_formset(self, request, survey_obj, *args, **kwargs):
         formset = super().get_formset(request, survey_obj, *args, **kwargs)
@@ -31,10 +40,15 @@ class SurveyAdmin(admin.ModelAdmin):
         "is_published",
         "page",
         "need_logged_user",
+        "multiple_responses",
         "template",
         "total_questions_display",
     )
-    list_filter = ("is_published", "need_logged_user")
+    list_filter = (
+        "is_published",
+        "need_logged_user",
+        "multiple_responses",
+    )
     search_fields = ("name", "description")
     inlines = [CategoryInline, QuestionInline]
     actions = [make_published, Survey2Csv.export_as_csv, Survey2Tex.export_as_tex]
@@ -53,15 +67,26 @@ class AnswerBaseInline(admin.StackedInline):
     fields = (
         "is_correct",
         "question",
+        "correct_answer_display",
         "body",
     )
-    readonly_fields = ("question", "is_correct")
+    readonly_fields = (
+        "question",
+        "is_correct",
+        "correct_answer_display",
+    )
     extra = 0
     model = Answer
 
     @admin.display(description=_("Is correct"), boolean=True)
     def is_correct(self, obj):
         return obj.is_correct
+
+    @admin.display(description=_("Correct answer"))
+    def correct_answer_display(self, obj):
+        if obj.question and obj.question.correct_answer:
+            return obj.question.correct_answer
+        return _("Not set")
 
 
 class ResponseAdmin(admin.ModelAdmin):

@@ -41,6 +41,7 @@ class ResponseForm(models.ModelForm):
         """Expects a survey object to be passed in initially"""
         self.survey = kwargs.pop("survey")
         self.user = kwargs.pop("user")
+        self.response_id = kwargs.pop("response_id", None)  # Новый параметр для редактирования конкретного Response
         try:
             self.step = int(kwargs.pop("step"))
         except KeyError:
@@ -108,16 +109,33 @@ class ResponseForm(models.ModelForm):
         if self.response:
             return self.response
 
+        # Если передан response_id, работаем с конкретным Response
+        if self.response_id:
+            try:
+                self.response = Response.objects.prefetch_related("user", "survey").get(pk=self.response_id)
+                return self.response
+            except Response.DoesNotExist:
+                LOGGER.debug("Response with id %s not found", self.response_id)
+                self.response = None
+                return self.response
+
         if not self.user.is_authenticated:
             self.response = None
         else:
-            try:
-                self.response = Response.objects.prefetch_related("user", "survey").get(
-                    user=self.user, survey=self.survey
-                )
-            except Response.DoesNotExist:
-                LOGGER.debug("No saved response for '%s' for user %s", self.survey, self.user)
+            # Логика для множественного прохождения опроса
+            if self.survey.multiple_responses:
+                # Если разрешено множественное прохождение и не указан конкретный response_id,
+                # то возвращаем None (создаем новый Response)
                 self.response = None
+            else:
+                # Старая логика - ищем существующий Response пользователя
+                try:
+                    self.response = Response.objects.prefetch_related("user", "survey").get(
+                        user=self.user, survey=self.survey
+                    )
+                except Response.DoesNotExist:
+                    LOGGER.debug("No saved response for '%s' for user %s", self.survey, self.user)
+                    self.response = None
         return self.response
 
     def _get_preexisting_answers(self):
@@ -255,6 +273,12 @@ class ResponseForm(models.ModelForm):
         if self.has_next_step():
             context = {"id": self.survey.id, "step": self.step + 1}
             return reverse("survey-detail-step", kwargs=context)
+
+    def next_step_url_for_response(self, response_id):
+        """URL для следующего шага при редактировании конкретного Response"""
+        if self.has_next_step():
+            context = {"response_id": response_id, "step": self.step + 1}
+            return reverse("survey-response-detail-step", kwargs=context)
 
     def current_step_url(self):
         return reverse("survey-detail-step", kwargs={"id": self.survey.id, "step": self.step})

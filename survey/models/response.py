@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 from django.db import models
+from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
 from .survey import Survey
@@ -31,6 +32,12 @@ class Response(models.Model):
         verbose_name = _("Set of answers to surveys")
         verbose_name_plural = _("Sets of answers to surveys")
 
+    def get_absolute_url(self):
+        if self.survey.multiple_responses:
+            return reverse("survey-response-detail", kwargs={"response_id": self.pk})
+        else:
+            return reverse("survey-detail", kwargs={"id": self.survey_id})
+
     @property
     def correct_answers_count(self) -> int:
         """
@@ -52,17 +59,17 @@ class Response(models.Model):
         return self.answers.count()
 
     @property
-    def correct_answers_percentage(self) -> float:
+    def correct_answers_percentage(self) -> int:
         """
         Returns the percentage of correct answers.
 
         Returns:
-            float: Percentage of correct answers (0-100)
+            int: Percentage of correct answers (0-100)
         """
         total = self.total_answers_count
         if total == 0:
-            return 0.0
-        return (self.correct_answers_count / total) * 100
+            return 0
+        return round((self.correct_answers_count / total) * 100)
 
     def __str__(self):
         msg = f"Response to {self.survey} by {self.user}"
