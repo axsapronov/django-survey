@@ -121,7 +121,7 @@ To uninstall `django-survey-and-report`, simply comment out or remove the 'surve
 in your `INSTALLED_APPS`.
 
 If you want to use the pdf rendering you need to install `xelatex`. If you're using the
-Sankey's diagram generation you will also have to install  `python3-tk`.
+Sankey's diagram generation you will also have to install `python3-tk`.
 
 ## Making a survey
 
