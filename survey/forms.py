@@ -315,7 +315,24 @@ class ResponseForm(models.ModelForm):
                     value, img_src = field_value.split(":", 1)
                     # TODO Handling of SELECT IMAGE
                     LOGGER.debug("Question.SELECT_IMAGE not implemented, please use : %s and %s", value, img_src)
-                answer.body = field_value
+
+                # Сохраняем оригинальное значение из choices
+                if question.type in [Question.RADIO, Question.SELECT, Question.SELECT_MULTIPLE, Question.SELECT_IMAGE]:
+                    choices = dict(question.get_choices())
+                    if question.type == Question.SELECT_MULTIPLE:
+                        # Для множественного выбора
+                        selected_values = []
+                        for val in field_value:
+                            if val in choices:
+                                selected_values.append(choices[val])
+                        answer.body = str(selected_values)
+                    else:
+                        # Для одиночного выбора
+                        if field_value in choices:
+                            answer.body = choices[field_value]
+                else:
+                    answer.body = field_value
+
                 data["responses"].append((answer.question.id, answer.body))
                 LOGGER.debug("Creating answer for question %d of type %s : %s", q_id, answer.question.type, field_value)
                 answer.response = response

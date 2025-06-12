@@ -43,6 +43,12 @@ class Answer(models.Model):
             return [self.body]
         return [x.replace("'", "") for x in self.body[1:-1].split(settings.CHOICES_SEPARATOR)]
 
+    @property
+    def display_value(self):
+        if self.question.type in [Question.RADIO, Question.SELECT, Question.SELECT_MULTIPLE]:
+            return ", ".join(self.values)
+        return self.body
+
     def _validate_value(self, value, question_type, choices=None):
         """
         Общий метод для валидации значения в зависимости от типа вопроса.

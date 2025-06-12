@@ -365,7 +365,7 @@ msgstr "Вернуться к списку опросов"
 #: survey/templates/survey/confirm.html:4
 #: survey/templates/survey/confirm.html:7
 msgid "Survey submitted"
-msgstr "Опрос представлен"
+msgstr "Ответы отправлены"
 
 #: survey/templates/survey/confirm.html:10
 msgid "Thanks! Your answers have been saved"

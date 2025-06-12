@@ -104,9 +104,4 @@ class SurveyDetail(View):
             if "next" in request.session:
                 del request.session["next"]
             return redirect(next_)
-
-        # Для множественных прохождений перенаправляем к списку ответов
-        if survey.multiple_responses and request.user.is_authenticated:
-            return redirect("survey-user-responses", survey_id=survey.id)
-
         return redirect(survey.redirect_url or "survey-confirmation", uuid=response.interview_uuid)

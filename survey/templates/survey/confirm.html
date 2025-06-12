@@ -9,7 +9,7 @@
     <div class="alert alert-success">
        {% trans "Thanks! Your answers have been saved" %}
     </div>
-    {% if response.survey.editable_answers %}
+    {% if object.survey.editable_answers %}
         <div class="alert alert-info">
            {% trans "You can always come back and change them." %}
         </div>
