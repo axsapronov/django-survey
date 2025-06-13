@@ -5,11 +5,11 @@ except ImportError:
     # See https://stackoverflow.com/a/70319607/2519059
     from django.urls import re_path as url
 
-from survey.views import ConfirmView, IndexView, ResponseDetail, SurveyCompleted, SurveyDetail, UserResponsesView
+from survey.views import ConfirmView, ResponseDetail, SurveyCompleted, SurveyDetail, SurveyListView, UserResponsesView
 from survey.views.survey_result import serve_result_csv
 
 urlpatterns = [
-    url(r"^$", IndexView.as_view(), name="survey-list"),
+    url(r"^$", SurveyListView.as_view(), name="survey-list"),
     url(r"^(?P<id>\d+)/$", SurveyDetail.as_view(), name="survey-detail"),
     url(r"^csv/(?P<primary_key>\d+)/", serve_result_csv, name="survey-result"),
     url(r"^(?P<id>\d+)/completed/", SurveyCompleted.as_view(), name="survey-completed"),

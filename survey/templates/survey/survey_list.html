@@ -15,8 +15,8 @@
     {% endif %}
 
 	<ul>
-		{% for survey in surveys %}
-		<li><a href="{{ survey.get_absolute_url }}">{% trans "Take the Survey"%} {{survey.name}}</a></li>
+		{% for object in object_list %}
+		<li><a href="{{ object.get_absolute_url }}">{% trans "Take the Survey"%} {{object.name}}</a></li>
 		{% endfor %}
 	</div>
 </div>

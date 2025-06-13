@@ -22,6 +22,8 @@ class Survey(models.Model):
         (ALL_IN_ONE_PAGE, _("All in one page")),
     ]
 
+    # TODO - add order field
+
     name = models.CharField(_("Name"), max_length=400)
     description = models.TextField(_("Description"))
     is_published = models.BooleanField(_("Users can see it and answer it"), default=True)
