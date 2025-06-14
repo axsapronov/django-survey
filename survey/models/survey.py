@@ -7,11 +7,13 @@ from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 
 
+from meta.models import ModelMeta
+
 def in_duration_day():
     return now() + timedelta(days=settings.DEFAULT_SURVEY_PUBLISHING_DURATION)
 
 
-class Survey(models.Model):
+class Survey(models.Model, ModelMeta):
     ALL_IN_ONE_PAGE = 0
     BY_QUESTION = 1
     BY_CATEGORY = 2
@@ -37,6 +39,13 @@ class Survey(models.Model):
     publish_date = models.DateField(_("Publication date"), blank=True, null=False, default=now)
     expire_date = models.DateField(_("Expiration date"), blank=True, null=False, default=in_duration_day)
     redirect_url = models.URLField(_("Redirect URL"), blank=True)
+
+    _metadata = {
+        "title": "name",
+        "description": "description",
+        "published_time": "publish_date",
+        "modified_time": "publish_date",
+    }
 
     class Meta:
         verbose_name = _("survey")

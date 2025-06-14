@@ -6,7 +6,6 @@ from django.views.generic import View
 
 from survey.decorators import survey_available
 from survey.forms import ResponseForm
-from survey.models import Response
 
 LOGGER = logging.getLogger(__name__)
 
@@ -24,9 +23,9 @@ class SurveyDetail(View):
             template_name = survey.template
         else:
             if survey.is_all_in_one_page():
-                template_name = "survey/one_page_survey.html"
+                template_name = "survey/survey_detail_one_page.html"
             else:
-                template_name = "survey/survey.html"
+                template_name = "survey/survey_detail.html"
 
         form = ResponseForm(survey=survey, user=request.user, step=step)
         categories = form.current_categories()
@@ -37,7 +36,7 @@ class SurveyDetail(View):
         }
         context = {
             "response_form": form,
-            "survey": survey,
+            "object": survey,
             "categories": categories,
             "step": step,
             "asset_context": asset_context,

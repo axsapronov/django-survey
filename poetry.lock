@@ -622,6 +622,22 @@ argon2 = ["argon2-cffi (>=19.1.0)"]
 bcrypt = ["bcrypt"]
 
 [[package]]
+name = "django-meta"
+version = "2.5.0"
+description = "Pluggable app for handling webpage meta tags and OpenGraph properties"
+optional = true
+python-versions = ">=3.9"
+groups = ["main"]
+markers = "extra == \"seo\""
+files = [
+    {file = "django_meta-2.5.0-py2.py3-none-any.whl", hash = "sha256:94674286c8515314a025958af6bbcb44d6134d5a2ea3a61f680a852d334af88d"},
+    {file = "django_meta-2.5.0.tar.gz", hash = "sha256:e30669865bccff6be61765dfc57d97ee0a68ab7625efd081dd9045e17f3500c5"},
+]
+
+[package.extras]
+docs = ["django (<6.0)", "sphinx-rtd-theme"]
+
+[[package]]
 name = "django-rosetta"
 version = "0.10.2"
 description = "A Django application that eases the translation of Django projects"
@@ -2154,8 +2170,9 @@ type = ["pytest-mypy"]
 [extras]
 dev = ["colorama", "coverage", "coveralls", "django-rosetta", "pre-commit", "pylint", "pylint-django", "pysankeybeta", "pytest", "pytest-django", "python-coveralls", "setuptools"]
 sankey = ["pysankeybeta"]
+seo = ["django-meta"]
 
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.9"
-content-hash = "befda28f4cbf1ac5630964d149c60fe54824f9842a634ed22f7b63a816b7d416"
+content-hash = "91ebc07e09b98ec95cf1bc217be130905f07da2c64dead82355f7283eed8aa55"

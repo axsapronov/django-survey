@@ -3,7 +3,7 @@
 {% load survey_extras %}
 {% load static %}
 
-{% block title %} {{survey.name}} {% endblock title %}
+{% block title %} {{object.name}} {% endblock title %}
 
 {% block extrajs %}
   {{response_form.media}}
@@ -22,13 +22,13 @@
 
 
 {% block body %}
-	<h1> {{survey.name}} </h1>
-	<div class="survey-description"> {{survey.description|safe}} </div>
+	<h1> {{object.name}} </h1>
+	<div class="survey-description"> {{object.description|safe}} </div>
 	<div>
       {% if step and step != 0 %}
-		<form action="{% url 'survey-detail-step' id=survey.id step=step %}" method="post">
+		<form action="{% url 'survey-detail-step' id=object.id step=step %}" method="post">
 	{% else %}
-		<form action="{% url 'survey-detail' id=survey.id %}" method="post">
+		<form action="{% url 'survey-detail' id=object.id %}" method="post">
 	{% endif %}
 	    {% csrf_token %}
         {% for category in categories %}
@@ -45,7 +45,7 @@
 			            </a></h3>
 				    </div>
                     <div class="category-container">
-				        <div id="collapse{{category.slugify}}" class="panel-collapse collapse show {% if not survey.editable_answers and response_form.response is not None %}in{% endif %}
+				        <div id="collapse{{category.slugify}}" class="panel-collapse collapse show {% if not object.editable_answers and response_form.response is not None %}in{% endif %}
 				        {{ response_form|collapse_form:category }}">
 				            <div class="panel-body">
 	                           {% include "survey/question.html" %}
@@ -59,7 +59,7 @@
         {% endfor %}
 
         <br>
-		{% if survey.editable_answers or response_form.response is None %}
+		{% if object.editable_answers or response_form.response is None %}
 	    {% if response_form.has_next_step %}
 				    <input
   			          class="btn btn-default btn-lg"
