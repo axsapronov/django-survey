@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-06-12 07:27+0000\n"
+"POT-Creation-Date: 2025-06-20 15:02+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -35,6 +35,30 @@ msgstr[1] ""
 
 #: survey/actions.py:18
 msgid "Mark selected surveys as published"
+msgstr ""
+
+#: survey/admin.py:61
+msgid "Total questions"
+msgstr ""
+
+#: survey/admin.py:81
+msgid "Is correct"
+msgstr ""
+
+#: survey/admin.py:85
+msgid "Correct answer"
+msgstr ""
+
+#: survey/admin.py:89
+msgid "Not set"
+msgstr ""
+
+#: survey/admin.py:116 survey/templates/survey/user_responses.html:26
+msgid "Correct answers"
+msgstr ""
+
+#: survey/apps.py:12
+msgid "Survey and report"
 msgstr ""
 
 #: survey/decorators.py:27
@@ -144,32 +168,32 @@ msgstr ""
 msgid "Export to PDF"
 msgstr ""
 
-#: survey/models/answer.py:20
+#: survey/models/answer.py:22
 msgid "Question"
 msgstr ""
 
-#: survey/models/answer.py:21
+#: survey/models/answer.py:23
 msgid "Response"
 msgstr ""
 
-#: survey/models/answer.py:22 survey/models/response.py:24
+#: survey/models/answer.py:24 survey/models/response.py:25
 msgid "Creation date"
 msgstr ""
 
-#: survey/models/answer.py:23 survey/models/response.py:25
+#: survey/models/answer.py:25 survey/models/response.py:26
 msgid "Update date"
 msgstr ""
 
-#: survey/models/answer.py:24
+#: survey/models/answer.py:26
 msgid "Content"
 msgstr ""
 
-#: survey/models/category.py:9 survey/models/survey.py:25
+#: survey/models/category.py:9 survey/models/survey.py:30
 msgid "Name"
 msgstr ""
 
-#: survey/models/category.py:10 survey/models/question.py:72
-#: survey/models/response.py:26
+#: survey/models/category.py:10 survey/models/question.py:78
+#: survey/models/response.py:27
 msgid "Survey"
 msgstr ""
 
@@ -177,7 +201,7 @@ msgstr ""
 msgid "Display order"
 msgstr ""
 
-#: survey/models/category.py:12 survey/models/survey.py:26
+#: survey/models/category.py:12 survey/models/survey.py:31
 msgid "Description"
 msgstr ""
 
@@ -197,139 +221,154 @@ msgid ""
 "options for this question ."
 msgstr ""
 
-#: survey/models/question.py:55
-msgid "text (multiple line)"
-msgstr ""
-
-#: survey/models/question.py:56
-msgid "short text (one line)"
-msgstr ""
-
-#: survey/models/question.py:57
-msgid "radio"
-msgstr ""
-
-#: survey/models/question.py:58
-msgid "select"
-msgstr ""
-
-#: survey/models/question.py:59
-msgid "Select Multiple"
-msgstr ""
-
-#: survey/models/question.py:60
-msgid "Select Image"
+#: survey/models/question.py:23
+msgid ""
+"Optional. Set the correct answer for this question. \n"
+"For multiple choice questions, use comma-separated values. \n"
+"For text questions, provide the exact expected answer."
 msgstr ""
 
 #: survey/models/question.py:61
-msgid "integer"
+msgid "text (multiple line)"
 msgstr ""
 
 #: survey/models/question.py:62
-msgid "float"
+msgid "short text (one line)"
 msgstr ""
 
 #: survey/models/question.py:63
-msgid "date"
+msgid "radio"
+msgstr ""
+
+#: survey/models/question.py:64
+msgid "select"
+msgstr ""
+
+#: survey/models/question.py:65
+msgid "Select Multiple"
 msgstr ""
 
 #: survey/models/question.py:66
-msgid "Text"
+msgid "Select Image"
 msgstr ""
 
 #: survey/models/question.py:67
-msgid "Order"
+msgid "integer"
 msgstr ""
 
 #: survey/models/question.py:68
-msgid "Required"
+msgid "float"
 msgstr ""
 
-#: survey/models/question.py:70
-msgid "Category"
+#: survey/models/question.py:69
+msgid "date"
+msgstr ""
+
+#: survey/models/question.py:72
+msgid "Text"
 msgstr ""
 
 #: survey/models/question.py:73
-msgid "Type"
+msgid "Order"
 msgstr ""
 
 #: survey/models/question.py:74
+msgid "Required"
+msgstr ""
+
+#: survey/models/question.py:76
+msgid "Category"
+msgstr ""
+
+#: survey/models/question.py:79
+msgid "Type"
+msgstr ""
+
+#: survey/models/question.py:80
 msgid "Choices"
 msgstr ""
 
-#: survey/models/question.py:77
+#: survey/models/question.py:81
+msgid "Correct Answer"
+msgstr ""
+
+#: survey/models/question.py:84
 msgid "question"
 msgstr ""
 
-#: survey/models/question.py:78
+#: survey/models/question.py:85
 msgid "questions"
 msgstr ""
 
-#: survey/models/response.py:27
+#: survey/models/response.py:28
 msgid "User"
 msgstr ""
 
-#: survey/models/response.py:28
+#: survey/models/response.py:29
 msgid "Interview unique identifier"
 msgstr ""
 
-#: survey/models/response.py:31
+#: survey/models/response.py:32
 msgid "Set of answers to surveys"
 msgstr ""
 
-#: survey/models/response.py:32
+#: survey/models/response.py:33
 msgid "Sets of answers to surveys"
 msgstr ""
 
-#: survey/models/survey.py:20
+#: survey/models/survey.py:22
 msgid "By question"
 msgstr ""
 
-#: survey/models/survey.py:21
+#: survey/models/survey.py:23
 msgid "By category"
 msgstr ""
 
-#: survey/models/survey.py:22
+#: survey/models/survey.py:24
 msgid "All in one page"
 msgstr ""
 
-#: survey/models/survey.py:27
+#: survey/models/survey.py:32
 msgid "Users can see it and answer it"
 msgstr ""
 
-#: survey/models/survey.py:28
+#: survey/models/survey.py:33
 msgid "Only authenticated users can see it and answer it"
 msgstr ""
 
-#: survey/models/survey.py:29
+#: survey/models/survey.py:34
 msgid "Users can edit their answers afterwards"
 msgstr ""
 
-#: survey/models/survey.py:31
+#: survey/models/survey.py:35
+msgid "Allow multiple responses from same user"
+msgstr ""
+
+#: survey/models/survey.py:37
 msgid "Display method"
 msgstr ""
 
-#: survey/models/survey.py:33
+#: survey/models/survey.py:39
 msgid "Template"
 msgstr ""
 
-#: survey/models/survey.py:34
+#: survey/models/survey.py:40
 msgid "Publication date"
 msgstr ""
 
-#: survey/models/survey.py:35
+#: survey/models/survey.py:41
 msgid "Expiration date"
 msgstr ""
 
-#: survey/models/survey.py:36
+#: survey/models/survey.py:42
 msgid "Redirect URL"
 msgstr ""
 
-#: survey/models/survey.py:39
+#: survey/models/survey.py:52
 msgid "survey"
 msgstr ""
 
-#: survey/models/survey.py:40
+#: survey/models/survey.py:53
 msgid "surveys"
 msgstr ""
 
@@ -359,26 +398,63 @@ msgstr ""
 msgid "You can always come back and change them."
 msgstr ""
 
-#: survey/templates/survey/list.html:6
-msgid "Welcome to the Django Survey app"
-msgstr ""
-
-#: survey/templates/survey/list.html:19
-msgid "Take the Survey"
-msgstr ""
-
-#: survey/templates/survey/survey.html:44
+#: survey/templates/survey/survey_detail.html:44
 msgid "Answer this part"
 msgstr ""
 
-#: survey/templates/survey/survey.html:57
+#: survey/templates/survey/survey_detail.html:57
 msgid "Questions"
 msgstr ""
 
-#: survey/templates/survey/survey.html:67
+#: survey/templates/survey/survey_detail.html:67
 msgid "Next!"
 msgstr ""
 
-#: survey/templates/survey/survey.html:73
+#: survey/templates/survey/survey_detail.html:73
 msgid "I'm done!"
+msgstr ""
+
+#: survey/templates/survey/survey_list.html:6
+msgid "Welcome to the Django Survey app"
+msgstr ""
+
+#: survey/templates/survey/survey_list.html:19
+msgid "Take the Survey"
+msgstr ""
+
+#: survey/templates/survey/user_responses.html:5
+#: survey/templates/survey/user_responses.html:11
+msgid "Your responses to"
+msgstr ""
+
+#: survey/templates/survey/user_responses.html:15
+msgid "Take survey again"
+msgstr ""
+
+#: survey/templates/survey/user_responses.html:24
+msgid "Date completed"
+msgstr ""
+
+#: survey/templates/survey/user_responses.html:25
+msgid "Last updated"
+msgstr ""
+
+#: survey/templates/survey/user_responses.html:27
+msgid "Actions"
+msgstr ""
+
+#: survey/templates/survey/user_responses.html:40
+msgid "No answers"
+msgstr ""
+
+#: survey/templates/survey/user_responses.html:45
+msgid "View/Edit"
+msgstr ""
+
+#: survey/templates/survey/user_responses.html:55
+msgid "You haven't completed this survey yet."
+msgstr ""
+
+#: survey/templates/survey/user_responses.html:56
+msgid "Take it now"
 msgstr ""

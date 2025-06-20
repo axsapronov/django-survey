@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-06-12 07:27+0000\n"
+"POT-Creation-Date: 2025-06-20 15:02+0000\n"
 "PO-Revision-Date: 2020-02-23 14:44+0000\n"
 "Last-Translator: b'  <>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -37,6 +37,32 @@ msgstr[1] "%(count)d questionnaires ont été publiés avec succès."
 #: survey/actions.py:18
 msgid "Mark selected surveys as published"
 msgstr "Marquer le sondage comme publié"
+
+#: survey/admin.py:61
+#, fuzzy
+#| msgid "questions"
+msgid "Total questions"
+msgstr "questions"
+
+#: survey/admin.py:81
+msgid "Is correct"
+msgstr ""
+
+#: survey/admin.py:85
+msgid "Correct answer"
+msgstr ""
+
+#: survey/admin.py:89
+msgid "Not set"
+msgstr ""
+
+#: survey/admin.py:116 survey/templates/survey/user_responses.html:26
+msgid "Correct answers"
+msgstr ""
+
+#: survey/apps.py:12
+msgid "Survey and report"
+msgstr ""
 
 #: survey/decorators.py:27
 msgid "This survey has expired for new submissions."
@@ -149,32 +175,32 @@ msgstr "Erreur durant la génération du PDF: %s"
 msgid "Export to PDF"
 msgstr "Export vers PDF"
 
-#: survey/models/answer.py:20
+#: survey/models/answer.py:22
 msgid "Question"
 msgstr "Question"
 
-#: survey/models/answer.py:21
+#: survey/models/answer.py:23
 msgid "Response"
 msgstr "Réponse"
 
-#: survey/models/answer.py:22 survey/models/response.py:24
+#: survey/models/answer.py:24 survey/models/response.py:25
 msgid "Creation date"
 msgstr "Date de création"
 
-#: survey/models/answer.py:23 survey/models/response.py:25
+#: survey/models/answer.py:25 survey/models/response.py:26
 msgid "Update date"
 msgstr "Date de mise à jour"
 
-#: survey/models/answer.py:24
+#: survey/models/answer.py:26
 msgid "Content"
 msgstr "Contenu"
 
-#: survey/models/category.py:9 survey/models/survey.py:25
+#: survey/models/category.py:9 survey/models/survey.py:30
 msgid "Name"
 msgstr "Nom"
 
-#: survey/models/category.py:10 survey/models/question.py:72
-#: survey/models/response.py:26
+#: survey/models/category.py:10 survey/models/question.py:78
+#: survey/models/response.py:27
 msgid "Survey"
 msgstr "Sondage"
 
@@ -182,7 +208,7 @@ msgstr "Sondage"
 msgid "Display order"
 msgstr "Ordre d'affichage"
 
-#: survey/models/category.py:12 survey/models/survey.py:26
+#: survey/models/category.py:12 survey/models/survey.py:31
 msgid "Description"
 msgstr "Description"
 
@@ -202,143 +228,158 @@ msgid ""
 "options for this question ."
 msgstr "Le champ choix est utilisé seulement si la question est de type 'bouton radio', 'liste déroulante', ou 'liste à choix multiple', il faut fournir la liste des options pour cette question sous la forme d'une liste séparée par des virgules."
 
-#: survey/models/question.py:55
+#: survey/models/question.py:23
+msgid ""
+"Optional. Set the correct answer for this question. \n"
+"For multiple choice questions, use comma-separated values. \n"
+"For text questions, provide the exact expected answer."
+msgstr ""
+
+#: survey/models/question.py:61
 msgid "text (multiple line)"
 msgstr "Texte (plusieurs lignes)"
 
-#: survey/models/question.py:56
+#: survey/models/question.py:62
 msgid "short text (one line)"
 msgstr "Texte court (une ligne)"
 
-#: survey/models/question.py:57
+#: survey/models/question.py:63
 msgid "radio"
 msgstr "Bouton radio"
 
-#: survey/models/question.py:58
+#: survey/models/question.py:64
 msgid "select"
 msgstr "Liste déroulante"
 
-#: survey/models/question.py:59
+#: survey/models/question.py:65
 msgid "Select Multiple"
 msgstr "Liste à choix multiple"
 
-#: survey/models/question.py:60
+#: survey/models/question.py:66
 msgid "Select Image"
 msgstr "Séléctionnez l'image"
 
-#: survey/models/question.py:61
+#: survey/models/question.py:67
 msgid "integer"
 msgstr "Chiffre"
 
-#: survey/models/question.py:62
+#: survey/models/question.py:68
 msgid "float"
 msgstr "Décimal"
 
-#: survey/models/question.py:63
+#: survey/models/question.py:69
 msgid "date"
 msgstr ""
 
-#: survey/models/question.py:66
+#: survey/models/question.py:72
 msgid "Text"
 msgstr "Texte"
 
-#: survey/models/question.py:67
+#: survey/models/question.py:73
 msgid "Order"
 msgstr "Ordre"
 
-#: survey/models/question.py:68
+#: survey/models/question.py:74
 msgid "Required"
 msgstr "Requise"
 
-#: survey/models/question.py:70
+#: survey/models/question.py:76
 msgid "Category"
 msgstr "Catégorie"
 
-#: survey/models/question.py:73
+#: survey/models/question.py:79
 msgid "Type"
 msgstr "Type"
 
-#: survey/models/question.py:74
+#: survey/models/question.py:80
 msgid "Choices"
 msgstr "Choix"
 
-#: survey/models/question.py:77
+#: survey/models/question.py:81
+msgid "Correct Answer"
+msgstr ""
+
+#: survey/models/question.py:84
 msgid "question"
 msgstr "question"
 
-#: survey/models/question.py:78
+#: survey/models/question.py:85
 msgid "questions"
 msgstr "questions"
 
-#: survey/models/response.py:27
+#: survey/models/response.py:28
 msgid "User"
 msgstr "Utilisateur"
 
-#: survey/models/response.py:28
+#: survey/models/response.py:29
 msgid "Interview unique identifier"
 msgstr "Identifiant unique de la réponse"
 
-#: survey/models/response.py:31
+#: survey/models/response.py:32
 msgid "Set of answers to surveys"
 msgstr "Ensemble de réponse aux sondages"
 
-#: survey/models/response.py:32
+#: survey/models/response.py:33
 msgid "Sets of answers to surveys"
 msgstr "Ensembles de réponse aux sondages"
 
-#: survey/models/survey.py:20
+#: survey/models/survey.py:22
 #, fuzzy
 #| msgid "question"
 msgid "By question"
 msgstr "Par question"
 
-#: survey/models/survey.py:21
+#: survey/models/survey.py:23
 #, fuzzy
 #| msgid "category"
 msgid "By category"
 msgstr "Par catégorie"
 
-#: survey/models/survey.py:22
+#: survey/models/survey.py:24
 msgid "All in one page"
 msgstr "Tout dans une même page"
 
-#: survey/models/survey.py:27
+#: survey/models/survey.py:32
 msgid "Users can see it and answer it"
 msgstr "Les utilisateurs peuvent le voir et y répondre"
 
-#: survey/models/survey.py:28
+#: survey/models/survey.py:33
 msgid "Only authenticated users can see it and answer it"
 msgstr "Seuls les utilisateurs authentifiés peuvent le voir et y répondre"
 
-#: survey/models/survey.py:29
+#: survey/models/survey.py:34
 msgid "Users can edit their answers afterwards"
 msgstr "Les utilisateurs peuvent modifier leur réponse"
 
-#: survey/models/survey.py:31
+#: survey/models/survey.py:35
+msgid "Allow multiple responses from same user"
+msgstr ""
+
+#: survey/models/survey.py:37
 msgid "Display method"
 msgstr "Méthode d'affichage"
 
-#: survey/models/survey.py:33
+#: survey/models/survey.py:39
 msgid "Template"
 msgstr "Modèle"
 
-#: survey/models/survey.py:34
+#: survey/models/survey.py:40
 msgid "Publication date"
 msgstr "Date de publication"
 
-#: survey/models/survey.py:35
+#: survey/models/survey.py:41
 msgid "Expiration date"
 msgstr "Date de suppression"
 
-#: survey/models/survey.py:36
+#: survey/models/survey.py:42
 msgid "Redirect URL"
 msgstr "URL de redirection"
 
-#: survey/models/survey.py:39
+#: survey/models/survey.py:52
 msgid "survey"
 msgstr "sondage"
 
-#: survey/models/survey.py:40
+#: survey/models/survey.py:53
 msgid "surveys"
 msgstr "sondages"
 
@@ -368,26 +409,71 @@ msgstr "Merci! Vos réponses ont été sauvegardées."
 msgid "You can always come back and change them."
 msgstr "Vous pouvez revenir les modifier plus tard."
 
-#: survey/templates/survey/list.html:6
-msgid "Welcome to the Django Survey app"
-msgstr "Bienvenue dans l'application Django-Survey"
-
-#: survey/templates/survey/list.html:19
-msgid "Take the Survey"
-msgstr "Réaliser le sondage"
-
-#: survey/templates/survey/survey.html:44
+#: survey/templates/survey/survey_detail.html:44
 msgid "Answer this part"
 msgstr "Répondre à cette partie"
 
-#: survey/templates/survey/survey.html:57
+#: survey/templates/survey/survey_detail.html:57
 msgid "Questions"
 msgstr "Questions"
 
-#: survey/templates/survey/survey.html:67
+#: survey/templates/survey/survey_detail.html:67
 msgid "Next!"
 msgstr "Suite"
 
-#: survey/templates/survey/survey.html:73
+#: survey/templates/survey/survey_detail.html:73
 msgid "I'm done!"
 msgstr "J'ai fini"
+
+#: survey/templates/survey/survey_list.html:6
+msgid "Welcome to the Django Survey app"
+msgstr "Bienvenue dans l'application Django-Survey"
+
+#: survey/templates/survey/survey_list.html:19
+msgid "Take the Survey"
+msgstr "Réaliser le sondage"
+
+#: survey/templates/survey/user_responses.html:5
+#: survey/templates/survey/user_responses.html:11
+msgid "Your responses to"
+msgstr ""
+
+#: survey/templates/survey/user_responses.html:15
+#, fuzzy
+#| msgid "Take the Survey"
+msgid "Take survey again"
+msgstr "Réaliser le sondage"
+
+#: survey/templates/survey/user_responses.html:24
+#, fuzzy
+#| msgid "Survey completed"
+msgid "Date completed"
+msgstr "Sondage terminé"
+
+#: survey/templates/survey/user_responses.html:25
+#, fuzzy
+#| msgid "Update date"
+msgid "Last updated"
+msgstr "Date de mise à jour"
+
+#: survey/templates/survey/user_responses.html:27
+#, fuzzy
+#| msgid "questions"
+msgid "Actions"
+msgstr "questions"
+
+#: survey/templates/survey/user_responses.html:40
+msgid "No answers"
+msgstr ""
+
+#: survey/templates/survey/user_responses.html:45
+msgid "View/Edit"
+msgstr ""
+
+#: survey/templates/survey/user_responses.html:55
+msgid "You haven't completed this survey yet."
+msgstr ""
+
+#: survey/templates/survey/user_responses.html:56
+msgid "Take it now"
+msgstr ""

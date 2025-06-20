@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-06-12 07:27+0000\n"
+"POT-Creation-Date: 2025-06-20 15:02+0000\n"
 "PO-Revision-Date: 2018-04-09 00:52+0000\n"
 "Last-Translator: b'  <nsuzue@me.com>'\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -36,6 +36,32 @@ msgstr[1] "%(count)d つの調査が「公開」に設定されました"
 #: survey/actions.py:18
 msgid "Mark selected surveys as published"
 msgstr "選択した調査を公開する"
+
+#: survey/admin.py:61
+#, fuzzy
+#| msgid "questions"
+msgid "Total questions"
+msgstr "質問"
+
+#: survey/admin.py:81
+msgid "Is correct"
+msgstr ""
+
+#: survey/admin.py:85
+msgid "Correct answer"
+msgstr ""
+
+#: survey/admin.py:89
+msgid "Not set"
+msgstr ""
+
+#: survey/admin.py:116 survey/templates/survey/user_responses.html:26
+msgid "Correct answers"
+msgstr ""
+
+#: survey/apps.py:12
+msgid "Survey and report"
+msgstr ""
 
 #: survey/decorators.py:27
 msgid "This survey has expired for new submissions."
@@ -144,32 +170,32 @@ msgstr ""
 msgid "Export to PDF"
 msgstr ""
 
-#: survey/models/answer.py:20
+#: survey/models/answer.py:22
 msgid "Question"
 msgstr "質問"
 
-#: survey/models/answer.py:21
+#: survey/models/answer.py:23
 msgid "Response"
 msgstr "反応"
 
-#: survey/models/answer.py:22 survey/models/response.py:24
+#: survey/models/answer.py:24 survey/models/response.py:25
 msgid "Creation date"
 msgstr "作成日"
 
-#: survey/models/answer.py:23 survey/models/response.py:25
+#: survey/models/answer.py:25 survey/models/response.py:26
 msgid "Update date"
 msgstr "更新日"
 
-#: survey/models/answer.py:24
+#: survey/models/answer.py:26
 msgid "Content"
 msgstr "内容"
 
-#: survey/models/category.py:9 survey/models/survey.py:25
+#: survey/models/category.py:9 survey/models/survey.py:30
 msgid "Name"
 msgstr "名前"
 
-#: survey/models/category.py:10 survey/models/question.py:72
-#: survey/models/response.py:26
+#: survey/models/category.py:10 survey/models/question.py:78
+#: survey/models/response.py:27
 msgid "Survey"
 msgstr "調査"
 
@@ -177,7 +203,7 @@ msgstr "調査"
 msgid "Display order"
 msgstr "表示順"
 
-#: survey/models/category.py:12 survey/models/survey.py:26
+#: survey/models/category.py:12 survey/models/survey.py:31
 msgid "Description"
 msgstr "定義"
 
@@ -197,145 +223,160 @@ msgid ""
 "options for this question ."
 msgstr "選択肢フィールドは、質問のタイプが「ラジオボタン」、「リスト（単一選択）」、「リスト（複数選択）」の場合のみ有効です。選択肢はカンマで区切ってください。"
 
-#: survey/models/question.py:55
+#: survey/models/question.py:23
+msgid ""
+"Optional. Set the correct answer for this question. \n"
+"For multiple choice questions, use comma-separated values. \n"
+"For text questions, provide the exact expected answer."
+msgstr ""
+
+#: survey/models/question.py:61
 msgid "text (multiple line)"
 msgstr "テキスト（複数行）"
 
-#: survey/models/question.py:56
+#: survey/models/question.py:62
 msgid "short text (one line)"
 msgstr "テキスト（一行）"
 
-#: survey/models/question.py:57
+#: survey/models/question.py:63
 msgid "radio"
 msgstr "ラジオボタン"
 
-#: survey/models/question.py:58
+#: survey/models/question.py:64
 msgid "select"
 msgstr "リスト（単一選択）"
 
-#: survey/models/question.py:59
+#: survey/models/question.py:65
 msgid "Select Multiple"
 msgstr "リスト（複数選択）"
 
-#: survey/models/question.py:60
+#: survey/models/question.py:66
 msgid "Select Image"
 msgstr "イメージ選択"
 
-#: survey/models/question.py:61
+#: survey/models/question.py:67
 msgid "integer"
 msgstr "整数"
 
-#: survey/models/question.py:62
+#: survey/models/question.py:68
 msgid "float"
 msgstr ""
 
-#: survey/models/question.py:63
+#: survey/models/question.py:69
 msgid "date"
 msgstr ""
 
-#: survey/models/question.py:66
+#: survey/models/question.py:72
 msgid "Text"
 msgstr "テキスト"
 
-#: survey/models/question.py:67
+#: survey/models/question.py:73
 msgid "Order"
 msgstr "順序"
 
-#: survey/models/question.py:68
+#: survey/models/question.py:74
 msgid "Required"
 msgstr "必須"
 
-#: survey/models/question.py:70
+#: survey/models/question.py:76
 msgid "Category"
 msgstr "分類"
 
-#: survey/models/question.py:73
+#: survey/models/question.py:79
 msgid "Type"
 msgstr "タイプ"
 
-#: survey/models/question.py:74
+#: survey/models/question.py:80
 msgid "Choices"
 msgstr "選択肢"
 
-#: survey/models/question.py:77
+#: survey/models/question.py:81
+msgid "Correct Answer"
+msgstr ""
+
+#: survey/models/question.py:84
 msgid "question"
 msgstr "質問"
 
-#: survey/models/question.py:78
+#: survey/models/question.py:85
 msgid "questions"
 msgstr "質問"
 
-#: survey/models/response.py:27
+#: survey/models/response.py:28
 msgid "User"
 msgstr "ユーザー"
 
-#: survey/models/response.py:28
+#: survey/models/response.py:29
 msgid "Interview unique identifier"
 msgstr "インタービューのユニークな識別子"
 
-#: survey/models/response.py:31
+#: survey/models/response.py:32
 msgid "Set of answers to surveys"
 msgstr "調査に対する回答集"
 
-#: survey/models/response.py:32
+#: survey/models/response.py:33
 msgid "Sets of answers to surveys"
 msgstr "調査に対する回答セット"
 
-#: survey/models/survey.py:20
+#: survey/models/survey.py:22
 #, fuzzy
 #| msgid "question"
 msgid "By question"
 msgstr "質問"
 
-#: survey/models/survey.py:21
+#: survey/models/survey.py:23
 #, fuzzy
 #| msgid "category"
 msgid "By category"
 msgstr "分類"
 
-#: survey/models/survey.py:22
+#: survey/models/survey.py:24
 msgid "All in one page"
 msgstr ""
 
-#: survey/models/survey.py:27
+#: survey/models/survey.py:32
 msgid "Users can see it and answer it"
 msgstr "すべてのユーザーが閲覧・回答できる"
 
-#: survey/models/survey.py:28
+#: survey/models/survey.py:33
 msgid "Only authenticated users can see it and answer it"
 msgstr "認証されたユーザーのみ閲覧・回答できる"
 
-#: survey/models/survey.py:29
+#: survey/models/survey.py:34
 msgid "Users can edit their answers afterwards"
 msgstr "ユーザーは後で回答を編集できます"
 
-#: survey/models/survey.py:31
+#: survey/models/survey.py:35
+msgid "Allow multiple responses from same user"
+msgstr ""
+
+#: survey/models/survey.py:37
 #, fuzzy
 #| msgid "Display order"
 msgid "Display method"
 msgstr "表示順"
 
-#: survey/models/survey.py:33
+#: survey/models/survey.py:39
 msgid "Template"
 msgstr "テンプレート"
 
-#: survey/models/survey.py:34
+#: survey/models/survey.py:40
 msgid "Publication date"
 msgstr ""
 
-#: survey/models/survey.py:35
+#: survey/models/survey.py:41
 msgid "Expiration date"
 msgstr ""
 
-#: survey/models/survey.py:36
+#: survey/models/survey.py:42
 msgid "Redirect URL"
 msgstr "リダイレクトURL"
 
-#: survey/models/survey.py:39
+#: survey/models/survey.py:52
 msgid "survey"
 msgstr "調査"
 
-#: survey/models/survey.py:40
+#: survey/models/survey.py:53
 msgid "surveys"
 msgstr "調査"
 
@@ -365,26 +406,71 @@ msgstr "ありがとうございました。回答内容が保存されました
 msgid "You can always come back and change them."
 msgstr "あとで回答内容を変更することが出来ます。"
 
-#: survey/templates/survey/list.html:6
-msgid "Welcome to the Django Survey app"
-msgstr "Django Surveyアプリケーションにようこそ"
-
-#: survey/templates/survey/list.html:19
-msgid "Take the Survey"
-msgstr "この調査に回答する"
-
-#: survey/templates/survey/survey.html:44
+#: survey/templates/survey/survey_detail.html:44
 msgid "Answer this part"
 msgstr "この質問に回答する"
 
-#: survey/templates/survey/survey.html:57
+#: survey/templates/survey/survey_detail.html:57
 msgid "Questions"
 msgstr "質問"
 
-#: survey/templates/survey/survey.html:67
+#: survey/templates/survey/survey_detail.html:67
 msgid "Next!"
 msgstr ""
 
-#: survey/templates/survey/survey.html:73
+#: survey/templates/survey/survey_detail.html:73
 msgid "I'm done!"
 msgstr "回答を終了する"
+
+#: survey/templates/survey/survey_list.html:6
+msgid "Welcome to the Django Survey app"
+msgstr "Django Surveyアプリケーションにようこそ"
+
+#: survey/templates/survey/survey_list.html:19
+msgid "Take the Survey"
+msgstr "この調査に回答する"
+
+#: survey/templates/survey/user_responses.html:5
+#: survey/templates/survey/user_responses.html:11
+msgid "Your responses to"
+msgstr ""
+
+#: survey/templates/survey/user_responses.html:15
+#, fuzzy
+#| msgid "Take the Survey"
+msgid "Take survey again"
+msgstr "この調査に回答する"
+
+#: survey/templates/survey/user_responses.html:24
+#, fuzzy
+#| msgid "Survey completed"
+msgid "Date completed"
+msgstr "調査終了"
+
+#: survey/templates/survey/user_responses.html:25
+#, fuzzy
+#| msgid "Update date"
+msgid "Last updated"
+msgstr "更新日"
+
+#: survey/templates/survey/user_responses.html:27
+#, fuzzy
+#| msgid "questions"
+msgid "Actions"
+msgstr "質問"
+
+#: survey/templates/survey/user_responses.html:40
+msgid "No answers"
+msgstr ""
+
+#: survey/templates/survey/user_responses.html:45
+msgid "View/Edit"
+msgstr ""
+
+#: survey/templates/survey/user_responses.html:55
+msgid "You haven't completed this survey yet."
+msgstr ""
+
+#: survey/templates/survey/user_responses.html:56
+msgid "Take it now"
+msgstr ""

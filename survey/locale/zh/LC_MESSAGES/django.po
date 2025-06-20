@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-06-12 07:27+0000\n"
+"POT-Creation-Date: 2025-06-20 15:02+0000\n"
 "PO-Revision-Date: 2018-04-09 00:52+0000\n"
 "Last-Translator: Zhu Sheng Li <digglife@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -37,6 +37,32 @@ msgstr[1] "%(count)d 件问卷成功标记为「已发布」"
 #: survey/actions.py:18
 msgid "Mark selected surveys as published"
 msgstr "标记选择的问卷为「已发布」"
+
+#: survey/admin.py:61
+#, fuzzy
+#| msgid "questions"
+msgid "Total questions"
+msgstr "问题"
+
+#: survey/admin.py:81
+msgid "Is correct"
+msgstr ""
+
+#: survey/admin.py:85
+msgid "Correct answer"
+msgstr ""
+
+#: survey/admin.py:89
+msgid "Not set"
+msgstr ""
+
+#: survey/admin.py:116 survey/templates/survey/user_responses.html:26
+msgid "Correct answers"
+msgstr ""
+
+#: survey/apps.py:12
+msgid "Survey and report"
+msgstr ""
 
 #: survey/decorators.py:27
 msgid "This survey has expired for new submissions."
@@ -149,32 +175,32 @@ msgstr "PDF生成期间发生错误：%s"
 msgid "Export to PDF"
 msgstr "导出为PDF"
 
-#: survey/models/answer.py:20
+#: survey/models/answer.py:22
 msgid "Question"
 msgstr "问题"
 
-#: survey/models/answer.py:21
+#: survey/models/answer.py:23
 msgid "Response"
 msgstr "回答"
 
-#: survey/models/answer.py:22 survey/models/response.py:24
+#: survey/models/answer.py:24 survey/models/response.py:25
 msgid "Creation date"
 msgstr "创建日期"
 
-#: survey/models/answer.py:23 survey/models/response.py:25
+#: survey/models/answer.py:25 survey/models/response.py:26
 msgid "Update date"
 msgstr "更新日期"
 
-#: survey/models/answer.py:24
+#: survey/models/answer.py:26
 msgid "Content"
 msgstr "内容"
 
-#: survey/models/category.py:9 survey/models/survey.py:25
+#: survey/models/category.py:9 survey/models/survey.py:30
 msgid "Name"
 msgstr "名字"
 
-#: survey/models/category.py:10 survey/models/question.py:72
-#: survey/models/response.py:26
+#: survey/models/category.py:10 survey/models/question.py:78
+#: survey/models/response.py:27
 msgid "Survey"
 msgstr "问卷"
 
@@ -182,7 +208,7 @@ msgstr "问卷"
 msgid "Display order"
 msgstr "显示顺序"
 
-#: survey/models/category.py:12 survey/models/survey.py:26
+#: survey/models/category.py:12 survey/models/survey.py:31
 msgid "Description"
 msgstr "描述"
 
@@ -202,139 +228,154 @@ msgid ""
 "options for this question ."
 msgstr "选项栏仅在问题类型为「单选按钮」、「单项选择」和「多项选择」时有效。选项请用逗号隔开。"
 
-#: survey/models/question.py:55
+#: survey/models/question.py:23
+msgid ""
+"Optional. Set the correct answer for this question. \n"
+"For multiple choice questions, use comma-separated values. \n"
+"For text questions, provide the exact expected answer."
+msgstr ""
+
+#: survey/models/question.py:61
 msgid "text (multiple line)"
 msgstr "文本（多行）"
 
-#: survey/models/question.py:56
+#: survey/models/question.py:62
 msgid "short text (one line)"
 msgstr "短文本（单行）"
 
-#: survey/models/question.py:57
+#: survey/models/question.py:63
 msgid "radio"
 msgstr "单选按钮"
 
-#: survey/models/question.py:58
+#: survey/models/question.py:64
 msgid "select"
 msgstr "单选框"
 
-#: survey/models/question.py:59
+#: survey/models/question.py:65
 msgid "Select Multiple"
 msgstr "复选框"
 
-#: survey/models/question.py:60
+#: survey/models/question.py:66
 msgid "Select Image"
 msgstr "选择图片"
 
-#: survey/models/question.py:61
+#: survey/models/question.py:67
 msgid "integer"
 msgstr "整数"
 
-#: survey/models/question.py:62
+#: survey/models/question.py:68
 msgid "float"
 msgstr ""
 
-#: survey/models/question.py:63
+#: survey/models/question.py:69
 msgid "date"
 msgstr "日期"
 
-#: survey/models/question.py:66
+#: survey/models/question.py:72
 msgid "Text"
 msgstr "文本"
 
-#: survey/models/question.py:67
+#: survey/models/question.py:73
 msgid "Order"
 msgstr "顺序"
 
-#: survey/models/question.py:68
+#: survey/models/question.py:74
 msgid "Required"
 msgstr "必填"
 
-#: survey/models/question.py:70
+#: survey/models/question.py:76
 msgid "Category"
 msgstr "分类"
 
-#: survey/models/question.py:73
+#: survey/models/question.py:79
 msgid "Type"
 msgstr "类型"
 
-#: survey/models/question.py:74
+#: survey/models/question.py:80
 msgid "Choices"
 msgstr "选择"
 
-#: survey/models/question.py:77
+#: survey/models/question.py:81
+msgid "Correct Answer"
+msgstr ""
+
+#: survey/models/question.py:84
 msgid "question"
 msgstr "问题"
 
-#: survey/models/question.py:78
+#: survey/models/question.py:85
 msgid "questions"
 msgstr "问题"
 
-#: survey/models/response.py:27
+#: survey/models/response.py:28
 msgid "User"
 msgstr "用户"
 
-#: survey/models/response.py:28
+#: survey/models/response.py:29
 msgid "Interview unique identifier"
 msgstr "问卷的唯一标识"
 
-#: survey/models/response.py:31
+#: survey/models/response.py:32
 msgid "Set of answers to surveys"
 msgstr "问卷的几组回答"
 
-#: survey/models/response.py:32
+#: survey/models/response.py:33
 msgid "Sets of answers to surveys"
 msgstr "问卷的几组回答"
 
-#: survey/models/survey.py:20
+#: survey/models/survey.py:22
 msgid "By question"
 msgstr "按问题显示"
 
-#: survey/models/survey.py:21
+#: survey/models/survey.py:23
 msgid "By category"
 msgstr "按类别显示"
 
-#: survey/models/survey.py:22
+#: survey/models/survey.py:24
 msgid "All in one page"
 msgstr "综合显示"
 
-#: survey/models/survey.py:27
+#: survey/models/survey.py:32
 msgid "Users can see it and answer it"
 msgstr "用户可以浏览和回答"
 
-#: survey/models/survey.py:28
+#: survey/models/survey.py:33
 msgid "Only authenticated users can see it and answer it"
 msgstr "只有认证用户可以浏览和回答"
 
-#: survey/models/survey.py:29
+#: survey/models/survey.py:34
 msgid "Users can edit their answers afterwards"
 msgstr "用户可以随后编辑他们的答案"
 
-#: survey/models/survey.py:31
+#: survey/models/survey.py:35
+msgid "Allow multiple responses from same user"
+msgstr ""
+
+#: survey/models/survey.py:37
 msgid "Display method"
 msgstr "显示方式"
 
-#: survey/models/survey.py:33
+#: survey/models/survey.py:39
 msgid "Template"
 msgstr "模板"
 
-#: survey/models/survey.py:34
+#: survey/models/survey.py:40
 msgid "Publication date"
 msgstr "发布日期"
 
-#: survey/models/survey.py:35
+#: survey/models/survey.py:41
 msgid "Expiration date"
 msgstr "截止日期"
 
-#: survey/models/survey.py:36
+#: survey/models/survey.py:42
 msgid "Redirect URL"
 msgstr ""
 
-#: survey/models/survey.py:39
+#: survey/models/survey.py:52
 msgid "survey"
 msgstr "问卷"
 
-#: survey/models/survey.py:40
+#: survey/models/survey.py:53
 msgid "surveys"
 msgstr "问卷"
 
@@ -364,26 +405,71 @@ msgstr "谢谢！您的回答已保存"
 msgid "You can always come back and change them."
 msgstr "您可以随时回来修改它们"
 
-#: survey/templates/survey/list.html:6
-msgid "Welcome to the Django Survey app"
-msgstr "欢迎来到 Django 问卷APP"
-
-#: survey/templates/survey/list.html:19
-msgid "Take the Survey"
-msgstr "开始本问卷"
-
-#: survey/templates/survey/survey.html:44
+#: survey/templates/survey/survey_detail.html:44
 msgid "Answer this part"
 msgstr "回答本部分"
 
-#: survey/templates/survey/survey.html:57
+#: survey/templates/survey/survey_detail.html:57
 msgid "Questions"
 msgstr "问题"
 
-#: survey/templates/survey/survey.html:67
+#: survey/templates/survey/survey_detail.html:67
 msgid "Next!"
 msgstr ""
 
-#: survey/templates/survey/survey.html:73
+#: survey/templates/survey/survey_detail.html:73
 msgid "I'm done!"
 msgstr "完成！"
+
+#: survey/templates/survey/survey_list.html:6
+msgid "Welcome to the Django Survey app"
+msgstr "欢迎来到 Django 问卷APP"
+
+#: survey/templates/survey/survey_list.html:19
+msgid "Take the Survey"
+msgstr "开始本问卷"
+
+#: survey/templates/survey/user_responses.html:5
+#: survey/templates/survey/user_responses.html:11
+msgid "Your responses to"
+msgstr ""
+
+#: survey/templates/survey/user_responses.html:15
+#, fuzzy
+#| msgid "Take the Survey"
+msgid "Take survey again"
+msgstr "开始本问卷"
+
+#: survey/templates/survey/user_responses.html:24
+#, fuzzy
+#| msgid "Survey completed"
+msgid "Date completed"
+msgstr "问卷已完成"
+
+#: survey/templates/survey/user_responses.html:25
+#, fuzzy
+#| msgid "Update date"
+msgid "Last updated"
+msgstr "更新日期"
+
+#: survey/templates/survey/user_responses.html:27
+#, fuzzy
+#| msgid "questions"
+msgid "Actions"
+msgstr "问题"
+
+#: survey/templates/survey/user_responses.html:40
+msgid "No answers"
+msgstr ""
+
+#: survey/templates/survey/user_responses.html:45
+msgid "View/Edit"
+msgstr ""
+
+#: survey/templates/survey/user_responses.html:55
+msgid "You haven't completed this survey yet."
+msgstr ""
+
+#: survey/templates/survey/user_responses.html:56
+msgid "Take it now"
+msgstr ""

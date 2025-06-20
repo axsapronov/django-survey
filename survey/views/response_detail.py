@@ -37,7 +37,7 @@ class ResponseDetail(View):
             if survey.is_all_in_one_page():
                 template_name = "survey/one_page_survey.html"
             else:
-                template_name = "survey/survey.html"
+                template_name = "survey/survey_detail.html"
 
         # Создаем форму с предзаполненными данными из существующего Response
         form = ResponseForm(survey=survey, user=request.user, step=step, response_id=response_id)
@@ -101,7 +101,7 @@ class ResponseDetail(View):
             if survey.is_all_in_one_page():
                 template_name = "survey/one_page_survey.html"
             else:
-                template_name = "survey/survey.html"
+                template_name = "survey/survey_detail.html"
         return render(request, template_name, context)
 
     def treat_valid_form(self, form, kwargs, request, survey, response):
