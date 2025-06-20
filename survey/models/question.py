@@ -90,6 +90,12 @@ class Question(models.Model):
             validate_choices(self.choices)
         super().save(*args, **kwargs)
 
+    @property
+    def display_correct_answer(self):
+        if self.correct_answer:
+            return ", ".join(self.get_clean_correct_answer())
+        return None
+
     def get_clean_choices(self):
         """Return split and stripped list of choices with no null values."""
         if self.choices is None:

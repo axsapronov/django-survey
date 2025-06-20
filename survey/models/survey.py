@@ -25,6 +25,7 @@ class Survey(models.Model, ModelMeta):
     ]
 
     # TODO - add order field
+    # TODO - add slug field
 
     name = models.CharField(_("Name"), max_length=400)
     description = models.TextField(_("Description"))

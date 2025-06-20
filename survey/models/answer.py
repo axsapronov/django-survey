@@ -49,6 +49,7 @@ class Answer(models.Model):
             return ", ".join(self.values)
         return self.body
 
+
     def _validate_value(self, value, question_type, choices=None):
         """
         Общий метод для валидации значения в зависимости от типа вопроса.
