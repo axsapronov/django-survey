@@ -12,7 +12,11 @@ class BaseTest(TestCase):
     fixtures = [Path(HERE, "testdump.json")]
 
     def setUp(self):
-        user = User(username=settings.DEBUG_ADMIN_NAME, is_superuser=True, is_staff=True)
+        user = User(
+            username=settings.DEBUG_ADMIN_NAME,
+            is_superuser=True,
+            is_staff=True,
+        )
         user.set_password(settings.DEBUG_ADMIN_PASSWORD)
         user.save()
         self.client = Client()
@@ -22,7 +26,10 @@ class BaseTest(TestCase):
 
     def login(self):
         """Log the user in."""
-        is_logged = self.client.login(username=settings.DEBUG_ADMIN_NAME, password=settings.DEBUG_ADMIN_PASSWORD)
+        is_logged = self.client.login(
+            username=settings.DEBUG_ADMIN_NAME,
+            password=settings.DEBUG_ADMIN_PASSWORD,
+        )
         if not is_logged:  # pragma: no cover
             raise ValueError("Login failed for test user! Tests won't work.")
 

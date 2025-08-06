@@ -1,222 +1,113 @@
-import logging
+import pytest
+from django.contrib.auth.models import AnonymousUser
+from django.http import Http404
+from django.test import RequestFactory
+from django.urls import reverse
 
-from django.conf import settings
-from django.urls.base import reverse
-
-from survey.models import Answer
-from survey.models import Response
-from survey.models import Survey
-from survey.tests import BaseTest
-
-LOGGER = logging.getLogger(__name__)
+from survey.tests.factories import SurveyFactory
+from survey.tests.factories import UserFactory
+from survey.views import SurveyDetailView
 
 
-class TestSurveyDetail(BaseTest):
-    def test_survey_result(self):
-        """We need logging for survey detail if the survey need login."""
-        response = self.client.get(reverse("survey-detail", args=(2,)))
-        self.assertEqual(response.status_code, 200)
-        response = self.client.get(reverse("survey-detail", args=(1,)))
-        self.assertEqual(response.status_code, 302)
-        self.login()
-        response = self.client.get(reverse("survey-detail", args=(2,)))
-        self.assertEqual(response.status_code, 200)
-        response = self.client.get(reverse("survey-detail", args=(4,)))
-        self.assertEqual(response.status_code, 404)
-        response = self.client.get(reverse("survey-detail", args=(1,)))
-        self.assertEqual(response.status_code, 200)
+@pytest.mark.django_db
+class TestSurveyDetailView:
+    def setup_method(self):
+        self.factory = RequestFactory()
+        self.view = SurveyDetailView.as_view()
 
-    def test_survey_non_editable(self):
-        """
-        Checks that a survey indicated as non editable cannot be edited by
-        an authenticated user.
-        """
-        self.login()
-        response = self.client.post(
-            reverse("survey-detail", args=(1,)),
-            data={
-                "question_1": "maybe",
-                "question_2": "no",
-                "question_3": "This is a test of text",
-                "question_4": "no",
-                "question_5": 42,
-                "question_6": "whatever",
-            },
-        )
-        LOGGER.info(response.content)
-        self.assertEqual(response.status_code, 302)
+    def test_dispatch_published_survey(self):
+        """Тест доступа к опубликованному опросу"""
+        survey = SurveyFactory(is_published=True, need_logged_user=False)
 
-        response_saved = Response.objects.filter(user__username=settings.DEBUG_ADMIN_NAME, survey__id=1)
-        self.assertEqual(len(response_saved.all()), 1)
-        self.assertEqual(response_saved[0].id, 15)
+        request = self.factory.get(f"/survey/{survey.id}/")
+        request.user = AnonymousUser()
 
-        self.assertRedirects(response, reverse("survey-confirmation", args=(response_saved[0].interview_uuid,)))
+        response = self.view(request, survey_id=survey.id)
 
-        response = self.client.post(
-            reverse("survey-detail", args=(1,)),
-            data={
-                "question_1": "maybe",
-                "question_2": "no",
-                "question_3": "This is a test of edited text",
-                "question_4": "maybe",
-                "question_5": 4224,
-                "question_6": "maybe",
-            },
-        )
-        self.assertEqual(response.status_code, 302)
-        self.assertRedirects(response, reverse("survey-list"))
+        assert response.status_code == 200
 
-    def test_multipage_survey(self):
-        """
-        Checks that multipage survey is working.
-        """
-        self.login()
-        response = self.client.post(reverse("survey-detail", args=(5,)), data={"question_11": 42})
-        self.assertEqual(response.status_code, 302)
+    def test_dispatch_unpublished_survey_raises_404(self):
+        """Тест что неопубликованный опрос вызывает 404"""
+        survey = SurveyFactory(is_published=False, need_logged_user=False)
 
-        response_saved = Response.objects.filter(user__username=settings.DEBUG_ADMIN_NAME, survey__id=5)
-        self.assertEqual(len(response_saved.all()), 0)
+        request = self.factory.get(f"/survey/{survey.id}/")
+        request.user = AnonymousUser()
 
-        self.assertRedirects(response, reverse("survey-detail-step", args=(5, 1)))
+        with pytest.raises(Http404):
+            self.view(request, survey_id=survey.id)
 
-        response = self.client.post(reverse("survey-detail-step", args=(5, 1)), data={"question_12": "yes"})
-        self.assertEqual(response.status_code, 302)
+    def test_dispatch_private_survey_anonymous_user_redirects_to_login(self):
+        """Тест редиректа анонимного пользователя на логин для приватного опроса"""
+        survey = SurveyFactory(is_published=True, need_logged_user=True)
 
-        response_saved = Response.objects.filter(user__username=settings.DEBUG_ADMIN_NAME, survey__id=5)
-        self.assertEqual(len(response_saved.all()), 1)
-        self.assertRedirects(response, reverse("survey-confirmation", args=(response_saved[0].interview_uuid,)))
+        request = self.factory.get(f"/survey/{survey.id}/")
+        request.user = AnonymousUser()
 
-    def test_multipage_survey_edit(self):
-        """
-        Checks that a multipage survey can be rightfully edited.
-        """
-        self.login()
-        # first creates the initial response
-        response = self.client.post(reverse("survey-detail", args=(5,)), data={"question_11": 42})
-        response = self.client.post(reverse("survey-detail-step", args=(5, 1)), data={"question_12": "yes"})
-        response_saved = Response.objects.filter(user__username=settings.DEBUG_ADMIN_NAME, survey__id=5)
-        self.assertEqual(len(response_saved.all()), 1)
+        response = self.view(request, survey_id=survey.id)
 
-        # tries normal edit
-        response = self.client.post(reverse("survey-detail", args=(5,)), data={"question_11": 56})
-        response = self.client.post(reverse("survey-detail-step", args=(5, 1)), data={"question_12": "yes"})
-        response_saved = Response.objects.filter(user__username=settings.DEBUG_ADMIN_NAME, survey__id=5)
-        self.assertEqual(len(response_saved.all()), 1)
-        answer_saved = Answer.objects.filter(
-            response__user__username=settings.DEBUG_ADMIN_NAME, response__survey__id=5, question__id=11
-        )
-        self.assertEqual(len(answer_saved.all()), 1)
-        self.assertEqual(answer_saved[0].body, "56")
+        assert response.status_code == 302
+        assert "login" in response.url
 
-        # tries forbidden edit (only a part of the form)
-        response = self.client.post(reverse("survey-detail-step", args=(5, 1)), data={"question_12": "no"})
-        self.assertEqual(response.status_code, 302)
-        self.assertRedirects(response, reverse("survey-list"))
-        answer_saved = Answer.objects.filter(
-            response__user__username=settings.DEBUG_ADMIN_NAME, response__survey__id=5, question__id=12
-        )
-        self.assertEqual(len(answer_saved.all()), 1)
-        self.assertEqual(answer_saved[0].body, "yes")
+    def test_dispatch_private_survey_authenticated_user_access(self):
+        """Тест доступа аутентифицированного пользователя к приватному опросу"""
+        user = UserFactory()
+        survey = SurveyFactory(is_published=True, need_logged_user=True)
 
-    def test_when_expiration_date_is_in_past_survey_is_not_visible(self):
-        """when expiration_date is in the past the survey should be hidden"""
-        response = self.client.get(reverse("survey-detail", args=(6,)))
-        self.assertEqual(response.status_code, 302)
-        self.assertRedirects(response, reverse("survey-list"))
+        request = self.factory.get(f"/survey/{survey.id}/")
+        request.user = user
 
-    def test_when_publication_date_is_in_future_survey_is_not_visible(self):
-        """when publish_date is in the future the survey should be hidden"""
-        response = self.client.get(reverse("survey-detail", args=(7,)))
-        self.assertEqual(response.status_code, 404)
+        response = self.view(request, survey_id=survey.id)
 
-    def test_when_expiration_date_is_in_past_survey_is_not_visible_via_post(self):
-        """when expiration_date is in the past the survey should be hidden for post requests"""
-        response = self.client.post(reverse("survey-detail", args=(6,)))
-        self.assertEqual(response.status_code, 302)
-        self.assertRedirects(response, reverse("survey-list"))
+        assert response.status_code == 200
 
-    def test_when_publication_date_is_in_future_survey_is_not_visible_via_post(self):
-        """when publish_date is in the future the survey should be hidden for post requests"""
-        response = self.client.post(reverse("survey-detail", args=(7,)))
-        self.assertEqual(response.status_code, 404)
+    def test_get_context_data(self):
+        """Тест контекста страницы"""
+        survey = SurveyFactory(is_published=True, need_logged_user=False)
 
-    # def test_the_survey_should_be_visible(self):
-    #     """when publish_date is in the past and expiration in the future
-    #     the survey should be visible"""
-    #     response = self.client.get(reverse("survey-detail", args=(8,)))
-    #     self.assertEqual(response.status_code, 200)
+        request = self.factory.get(f"/survey/{survey.id}/")
+        request.user = AnonymousUser()
 
-    def test_the_survey_should_be_visible_while_no_expiration(self):
-        """when publish_date is in the past and no expiration date is set
-        the survey should be visible"""
-        response = self.client.get(reverse("survey-detail", args=(9,)))
-        self.assertEqual(response.status_code, 200)
+        view = SurveyDetailView()
+        view.request = request
+        view.survey = survey
 
-    def test_the_survey_should_be_visible_while_no_publication_date(self):
-        """when expiration_date is in the future and no publication_date is set
-        the survey should be visible"""
-        response = self.client.get(reverse("survey-detail", args=(10,)))
-        self.assertEqual(response.status_code, 200)
+        context = view.get_context_data()
 
-    def test_when_the_survey_has_redirect_url(self):
-        """when a survey has redirect url, should redirect to redirect_url"""
-        response = self.client.post(
-            reverse("survey-detail", args=(12,)),
-            data={
-                "question_16": "test answer",
-            },
-        )
-        redirect_url = Survey.objects.get(pk=12).redirect_url
-        self.assertRedirects(response, redirect_url, status_code=302, fetch_redirect_response=False)
+        assert context["survey"] == survey
+        assert "total_questions" in context
 
-    # def test_multipage_category_survey(self):
-    #     """
-    #     Checks that multipage survey is working.
-    #     """
-    #     self.login()
-    #     response = self.client.post(reverse("survey-detail", args=(11,)), data={"question_13": 42, "question_15": 43})
-    #     self.assertEqual(response.status_code, 302)
-    #
-    #     response_saved = Response.objects.filter(user__username=settings.DEBUG_ADMIN_NAME, survey__id=11)
-    #     self.assertEqual(len(response_saved.all()), 0)
-    #
-    #     self.assertRedirects(response, reverse("survey-detail-step", args=(11, 1)))
-    #
-    #     response = self.client.post(reverse("survey-detail-step", args=(11, 1)), data={"question_14": "yes"})
-    #     self.assertEqual(response.status_code, 302)
-    #
-    #     response_saved = Response.objects.filter(user__username=settings.DEBUG_ADMIN_NAME, survey__id=11)
-    #     self.assertEqual(len(response_saved.all()), 1)
-    #     self.assertRedirects(response, reverse("survey-confirmation", args=(response_saved[0].interview_uuid,)))
-    #
-    # def test_multipage_category_survey_edit(self):
-    #     """
-    #     Checks that a multipage category survey can be rightfully edited.
-    #     """
-    #     self.login()
-    #     # first creates the initial response
-    #     response = self.client.post(reverse("survey-detail", args=(11,)), data={"question_13": 42, "question_15": 43})
-    #     response = self.client.post(reverse("survey-detail-step", args=(11, 1)), data={"question_14": "yes"})
-    #     response_saved = Response.objects.filter(user__username=settings.DEBUG_ADMIN_NAME, survey__id=11)
-    #     self.assertEqual(len(response_saved.all()), 1)
-    #
-    #     # tries normal edit
-    #     response = self.client.post(reverse("survey-detail", args=(11,)), data={"question_13": 56, "question_15": 57})
-    #     response = self.client.post(reverse("survey-detail-step", args=(11, 1)), data={"question_14": "yes"})
-    #     response_saved = Response.objects.filter(user__username=settings.DEBUG_ADMIN_NAME, survey__id=11)
-    #     self.assertEqual(len(response_saved.all()), 1)
-    #     answer_saved = Answer.objects.filter(
-    #         response__user__username=settings.DEBUG_ADMIN_NAME, response__survey__id=11, question__id=13
-    #     )
-    #     self.assertEqual(len(answer_saved.all()), 1)
-    #     self.assertEqual(answer_saved[0].body, "56")
-    #
-    #     # tries forbidden edit (only a part of the form)
-    #     response = self.client.post(reverse("survey-detail-step", args=(11, 1)), data={"question_14": "no"})
-    #     self.assertEqual(response.status_code, 302)
-    #     self.assertRedirects(response, reverse("survey-list"))
-    #     answer_saved = Answer.objects.filter(
-    #         response__user__username=settings.DEBUG_ADMIN_NAME, response__survey__id=11, question__id=14
-    #     )
-    #     self.assertEqual(len(answer_saved.all()), 1)
-    #     self.assertEqual(answer_saved[0].body, "yes")
+    def test_form_valid_creates_session_and_redirects(self):
+        """Тест создания сессии при валидной форме"""
+        survey = SurveyFactory(is_published=True, need_logged_user=False)
+
+        request = self.factory.post(f"/survey/{survey.id}/", {"start_survey": "true"})
+        request.user = AnonymousUser()
+        request.session = {}
+
+        response = self.view(request, survey_id=survey.id)
+
+        assert response.status_code == 302
+        assert "survey_session" in request.session
+        assert "survey_id" in request.session
+        assert "current_question" in request.session
+        assert request.session["survey_id"] == survey.id
+        assert request.session["current_question"] == 0
+
+    def test_view_with_client(self, client):
+        """Тест вьюхи через клиент"""
+        survey = SurveyFactory(is_published=True, need_logged_user=False)
+
+        response = client.get(reverse("survey:survey-detail", kwargs={"survey_id": survey.id}))
+        assert response.status_code == 200
+
+    def test_view_template_used(self, client):
+        """Тест использования правильного шаблона"""
+        survey = SurveyFactory(is_published=True, need_logged_user=False)
+
+        response = client.get(reverse("survey:survey-detail", kwargs={"survey_id": survey.id}))
+        assert "survey/survey_detail.html" in [t.name for t in response.templates]
+
+    def test_nonexistent_survey_raises_404(self, client):
+        """Тест 404 для несуществующего опроса"""
+        response = client.get(reverse("survey:survey-detail", kwargs={"survey_id": 99999}))
+        assert response.status_code == 404

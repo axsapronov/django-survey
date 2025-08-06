@@ -3,12 +3,13 @@ from survey.models import Question
 from survey.models import Response
 from survey.models import Survey
 from survey.tests import BaseTest
+from survey.tests.factories import SurveyFactory
 
 
 class BaseModelTest(BaseTest):
     def setUp(self):
         super().setUp()
-        self.survey = Survey.objects.create(
+        self.survey = SurveyFactory.create(
             name="Internal Test Survey",
             is_published=True,
             need_logged_user=False,
