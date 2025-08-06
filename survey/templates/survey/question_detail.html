@@ -1,0 +1,83 @@
+{% extends "survey/base.html" %}
+{% load i18n crispy_forms_tags %}
+
+{% block title %}{{ survey.name }} - {% trans "Вопрос" %} {{ current_question_index }}{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-12">
+
+            <!-- Прогресс бар -->
+            <div class="card mb-3 card-backgroundless">
+                <div class="card-body ">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="text-muted">{% trans "Прогресс" %}</span>
+                        <span class="text-muted">{{ current_question_index }} / {{ total_questions }}</span>
+                    </div>
+                    <div class="progress" style="height: 10px;">
+                        <div class="progress-bar bg-primary" role="progressbar" 
+                             style="width: {{ progress_percentage }}%" 
+                             aria-valuenow="{{ progress_percentage }}" 
+                             aria-valuemin="0" aria-valuemax="100">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Вопрос -->
+            <div class="card">
+                <div class="card-body">
+                    {% if not show_correct_answer %}
+                        <form method="post" id="question-form" class="space-e">
+                            {% csrf_token %}
+                            {{ form|crispy }}
+
+
+                            <div class="d-flex justify-content-between">
+                                <a href="{{ survey.get_absolute_url }}" class="btn btn-secondary">
+                                    <i class="fas fa-arrow-left me-2"></i>{% trans "Назад к введению" %}
+                                </a>
+                                <button type="submit" class="btn btn-primary" name="action_add">
+                                    {% if current_question_index == total_questions %}
+                                        <i class="fas fa-check me-2"></i>{% trans "Завершить опрос" %}
+                                    {% else %}
+                                        <i class="fas fa-arrow-right me-2"></i>{% trans "Следующий вопрос" %}
+                                    {% endif %}
+                                </button>
+                            </div>
+                            
+                        </form>
+                    {% else %}
+                        <!-- Показываем вопрос без формы после ответа -->
+                        <div class="mb-4">
+                            <h4 class="question-text">{{ question.text }}</h4>
+                            {% if question.required %}
+                                <span class="text-danger">* {% trans "Обязательный вопрос" %}</span>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Правильный ответ (показывается после отправки формы) -->
+            {% if show_correct_answer and correct_answer %}
+            <div class="card mt-3 border-success">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-check-circle me-2"></i>{% trans "Правильный ответ" %}</h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-0">{{ correct_answer }}</p>
+                    <div class="text-center mt-3">
+                        <a href="{% url 'survey:question-detail' survey_id=survey.id %}?next=true" class="btn btn-success">
+                            <i class="fas fa-arrow-right me-2"></i>{% trans "Следующий вопрос" %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% endblock body %} 

@@ -1,0 +1,200 @@
+{% extends "survey/base.html" %}
+{% load i18n %}
+
+{% block title %}{{ survey.name }} - {% trans "Результаты" %}{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <!-- Заголовок -->
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <h2 class="mb-0">
+                        <i class="fas fa-trophy me-2"></i>{% trans "Опрос завершен!" %}
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <h3>{{ survey.name }}</h3>
+                    <p class="text-muted">{{ survey.description|truncatewords:30 }}</p>
+                </div>
+            </div>
+
+            <!-- Общая статистика -->
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title">{% trans "Всего вопросов" %}</h5>
+                            <p class="display-4 text-primary">{{ total_questions }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title">{% trans "Правильных ответов" %}</h5>
+                            <p class="display-4 text-success">{{ correct_answers }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title">{% trans "Процент правильных" %}</h5>
+                            <p class="display-4 text-info">{{ correct_percentage }}%</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Прогресс бар результата -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">{% trans "Общий результат" %}</h5>
+                    <div class="progress" style="height: 25px;">
+                        <div class="progress-bar bg-success" role="progressbar" 
+                             style="width: {{ correct_percentage }}%" 
+                             aria-valuenow="{{ correct_percentage }}" 
+                             aria-valuemin="0" aria-valuemax="100">
+                            {{ correct_percentage }}%
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Детальные результаты -->
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">{% trans "Детальные результаты" %}</h4>
+                </div>
+                <div class="card-body">
+                    {% for answer_data in answers_data %}
+                    <div class="answer-item mb-4 p-3 border rounded">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <h5 class="question-number">{% trans "Вопрос" %} {{ forloop.counter }}</h5>
+                                <p class="question-text">{{ answer_data.question.text }}</p>
+                                
+                                <div class="answer-section">
+                                    <strong>{% trans "Ваш ответ:" %}</strong>
+                                    <p class="user-answer {% if answer_data.is_correct %}text-success{% else %}text-danger{% endif %}">
+                                        {{ answer_data.answer.display_value|default:"Не отвечено" }}
+                                    </p>
+                                </div>
+
+                                {% if answer_data.correct_answer %}
+                                <div class="correct-answer-section">
+                                    <strong>{% trans "Правильный ответ:" %}</strong>
+                                    <p class="correct-answer text-success">{{ answer_data.correct_answer }}</p>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4 text-center">
+                                {% if answer_data.is_correct %}
+                                    <div class="result-icon correct">
+                                        <i class="fas fa-check-circle fa-3x text-success"></i>
+                                        <p class="mt-2 text-success">{% trans "Правильно" %}</p>
+                                    </div>
+                                {% else %}
+                                    <div class="result-icon incorrect">
+                                        <i class="fas fa-times-circle fa-3x text-danger"></i>
+                                        <p class="mt-2 text-danger">{% trans "Неправильно" %}</p>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Кнопки действий -->
+            <div class="card mt-4">
+                <div class="card-body text-center">
+                    <div class="btn-group" role="group">
+                        <a href="{{ survey.get_absolute_url }}" class="btn btn-primary">
+                            <i class="fas fa-redo me-2"></i>{% trans "Пройти опрос снова" %}
+                        </a>
+                        <a href="{% url 'survey:survey-list' %}" class="btn btn-secondary">
+                            <i class="fas fa-list me-2"></i>{% trans "К списку опросов" %}
+                        </a>
+                        {% if survey.redirect_url %}
+                        <a href="{{ survey.redirect_url }}" class="btn btn-success">
+                            <i class="fas fa-external-link-alt me-2"></i>{% trans "Перейти по ссылке" %}
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.answer-item {
+    background-color: #f8f9fa;
+    transition: all 0.2s ease;
+}
+
+.answer-item:hover {
+    background-color: #e9ecef;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.question-number {
+    color: #495057;
+    font-weight: 600;
+}
+
+.question-text {
+    color: #2c3e50;
+    font-weight: 500;
+    line-height: 1.6;
+}
+
+.user-answer {
+    background-color: #fff;
+    padding: 8px 12px;
+    border-radius: 4px;
+    border-left: 4px solid;
+}
+
+.user-answer.text-success {
+    border-left-color: #28a745;
+}
+
+.user-answer.text-danger {
+    border-left-color: #dc3545;
+}
+
+.correct-answer {
+    background-color: #d4edda;
+    padding: 8px 12px;
+    border-radius: 4px;
+    border-left: 4px solid #28a745;
+}
+
+.result-icon {
+    padding: 20px;
+    border-radius: 8px;
+    background-color: #fff;
+}
+
+.progress {
+    border-radius: 15px;
+}
+
+.progress-bar {
+    border-radius: 15px;
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 25px;
+}
+
+.btn-group .btn {
+    margin: 0 5px;
+}
+</style>
+{% endblock body %} 
