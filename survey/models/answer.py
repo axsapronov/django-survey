@@ -46,7 +46,7 @@ class Answer(models.Model):
     )
 
     class Meta:
-        ordering = ("created",)
+        ordering = ("-created",)
         verbose_name = _("Answer")
         verbose_name_plural = _("Answers")
 

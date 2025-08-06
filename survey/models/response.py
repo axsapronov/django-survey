@@ -29,14 +29,15 @@ class Response(models.Model):
     interview_uuid = models.CharField(_("Interview unique identifier"), max_length=36)
 
     class Meta:
-        verbose_name = _("Set of answers to surveys")
-        verbose_name_plural = _("Sets of answers to surveys")
+        verbose_name = _("Survey Response")
+        verbose_name_plural = _("Survey Responses")
+        ordering = ["-created"]
 
     def get_absolute_url(self):
         if self.survey.multiple_responses:
-            return reverse("survey-response-detail", kwargs={"response_id": self.pk})
+            return reverse("survey:response-detail", kwargs={"response_id": self.pk, "survey_id": self.survey_id})
         else:
-            return reverse("survey-detail", kwargs={"id": self.survey_id})
+            return reverse("survey:survey-detail", kwargs={"survey_id": self.survey_id})
 
     @property
     def correct_answers_count(self) -> int:

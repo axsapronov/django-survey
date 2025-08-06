@@ -1,3 +1,5 @@
+from functools import cached_property
+import uuid
 from datetime import timedelta
 
 from django.conf import settings
@@ -5,15 +7,18 @@ from django.db import models
 from django.urls import reverse
 from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
-
-
 from meta.models import ModelMeta
+
 
 def in_duration_day():
     return now() + timedelta(days=settings.DEFAULT_SURVEY_PUBLISHING_DURATION)
 
 
-class Survey(models.Model, ModelMeta):
+def get_default_survey_slug():
+    return str(uuid.uuid4())
+
+
+class Survey(ModelMeta, models.Model):
     ALL_IN_ONE_PAGE = 0
     BY_QUESTION = 1
     BY_CATEGORY = 2
@@ -24,11 +29,28 @@ class Survey(models.Model, ModelMeta):
         (ALL_IN_ONE_PAGE, _("All in one page")),
     ]
 
-    # TODO - add order field
-    # TODO - add slug field
-
+    # slug = models.SlugField(
+    #     default=get_default_survey_slug,
+    #     unique=True,
+    #     verbose_name=_("Slug"),
+    #     help_text=_("Technical name for seo"),
+    # )
+    # order = models.SmallIntegerField(
+    #     verbose_name=_("Order"),
+    #     default=100,
+    # )
     name = models.CharField(_("Name"), max_length=400)
     description = models.TextField(_("Description"))
+
+    # TODO - short_description
+    # category = models.ForeignKey(
+    #     "Category",
+    #     on_delete=models.SET_NULL,
+    #     null=True,
+    #     blank=True,
+    #     verbose_name=_("Category"),
+    # )
+
     is_published = models.BooleanField(_("Users can see it and answer it"), default=True)
     need_logged_user = models.BooleanField(_("Only authenticated users can see it and answer it"))
     editable_answers = models.BooleanField(_("Users can edit their answers afterwards"), default=True)
@@ -49,8 +71,8 @@ class Survey(models.Model, ModelMeta):
     }
 
     class Meta:
-        verbose_name = _("survey")
-        verbose_name_plural = _("surveys")
+        verbose_name = _("Survey")
+        verbose_name_plural = _("Surveys")
 
     def __str__(self):
         return str(self.name)
@@ -70,7 +92,7 @@ class Survey(models.Model, ModelMeta):
         return min_
 
     def get_absolute_url(self):
-        return reverse("survey-detail", kwargs={"id": self.pk})
+        return reverse("survey:survey-detail", kwargs={"survey_id": self.pk})
 
     def non_empty_categories(self):
         return [x for x in list(self.categories.order_by("order", "id")) if x.questions.count() > 0]
@@ -78,7 +100,7 @@ class Survey(models.Model, ModelMeta):
     def is_all_in_one_page(self):
         return self.display_method == self.ALL_IN_ONE_PAGE
 
-    @property
+    @cached_property
     def total_questions(self) -> int:
         """
         Returns the total number of questions in the survey.
@@ -87,3 +109,13 @@ class Survey(models.Model, ModelMeta):
             int: The total number of questions
         """
         return self.questions.count()
+
+    @property
+    def template_name(self):
+        if self.template is not None and len(self.template) > 4:
+            return self.template
+
+        if self.is_all_in_one_page():
+            return "survey/survey_detail_one_page.html"
+        else:
+            return "survey/survey_detail.html"

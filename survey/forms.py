@@ -3,18 +3,22 @@ import uuid
 
 from django import forms
 from django.conf import settings
-from django.forms import models
-from django.urls import reverse
 from django.utils.text import slugify
 
-from survey.models import Answer, Category, Question, Response, Survey
-from survey.signals import survey_completed
+from survey.models import Answer
+from survey.models import Question
+from survey.models import Response
 from survey.widgets import ImageSelectWidget
 
 LOGGER = logging.getLogger(__name__)
 
 
-class ResponseForm(models.ModelForm):
+class QuestionForm(forms.Form):
+    """
+    Форма для обработки одного вопроса.
+    Сохраняет ответ сразу после валидации.
+    """
+
     FIELDS = {
         Question.TEXT: forms.CharField,
         Question.SHORT_TEXT: forms.CharField,
@@ -33,309 +37,274 @@ class ResponseForm(models.ModelForm):
         Question.SELECT_MULTIPLE: forms.CheckboxSelectMultiple,
     }
 
-    class Meta:
-        model = Response
-        fields = ()
+    def __init__(self, question, response, *args, **kwargs):
+        """
+        Инициализация формы для одного вопроса.
 
-    def __init__(self, *args, **kwargs):
-        """Expects a survey object to be passed in initially"""
-        self.survey = kwargs.pop("survey")
-        self.user = kwargs.pop("user")
-        self.response_id = kwargs.pop("response_id", None)  # Новый параметр для редактирования конкретного Response
-        try:
-            self.step = int(kwargs.pop("step"))
-        except KeyError:
-            self.step = None
+        Args:
+            question: Объект Question
+            response: Объект Response (может быть None для нового ответа)
+            *args, **kwargs: Стандартные аргументы формы
+        """
+        self.question = question
+        self.response = response
         super().__init__(*args, **kwargs)
-        self.uuid = uuid.uuid4().hex
 
-        self.categories = self.survey.non_empty_categories()
-        self.qs_with_no_cat = self.survey.questions.filter(category__isnull=True).order_by("order", "id")
+        # Добавляем поле для вопроса
+        self.add_question_field()
 
-        if self.survey.display_method == Survey.BY_CATEGORY:
-            self.steps_count = len(self.categories) + (1 if self.qs_with_no_cat else 0)
-        else:
-            self.steps_count = len(self.survey.questions.all())
-        # will contain prefetched data to avoid multiple db calls
-        self.response = False
-        self.answers = False
-
-        self.add_questions(kwargs.get("data"))
-
-        self._get_preexisting_response()
-
-        if not self.survey.editable_answers and self.response is not None:
-            for name in self.fields.keys():
-                self.fields[name].widget.attrs["disabled"] = True
-
-    def add_questions(self, data):
-        # add a field for each survey question, corresponding to the question
-        # type as appropriate.
-
-        if self.survey.display_method == Survey.BY_CATEGORY and self.step is not None:
-            if self.step == len(self.categories):
-                qs_for_step = self.survey.questions.filter(category__isnull=True).order_by("order", "id")
-            else:
-                qs_for_step = self.survey.questions.filter(category=self.categories[self.step])
-
-            for question in qs_for_step:
-                self.add_question(question, data)
-        else:
-            for i, question in enumerate(self.survey.questions.all()):
-                not_to_keep = i != self.step and self.step is not None
-                if self.survey.display_method == Survey.BY_QUESTION and not_to_keep:
-                    continue
-                self.add_question(question, data)
-
-    def current_categories(self):
-        if self.survey.display_method == Survey.BY_CATEGORY:
-            if self.step is not None and self.step < len(self.categories):
-                return [self.categories[self.step]]
-            return [Category(name="No category", description="No cat desc")]
-        else:
-            extras = []
-            if self.qs_with_no_cat:
-                extras = [Category(name="No category", description="No cat desc")]
-
-            return self.categories + extras
-
-    def _get_preexisting_response(self):
-        """Recover a pre-existing response in database.
-
-        The user must be logged. Will store the response retrieved in an attribute
-        to avoid multiple db calls.
-
-        :rtype: Response or None"""
+        # Если есть существующий ответ, заполняем начальными данными
         if self.response:
-            return self.response
+            self.set_initial_data()
 
-        # Если передан response_id, работаем с конкретным Response
-        if self.response_id:
-            try:
-                self.response = Response.objects.prefetch_related("user", "survey").get(pk=self.response_id)
-                return self.response
-            except Response.DoesNotExist:
-                LOGGER.debug("Response with id %s not found", self.response_id)
-                self.response = None
-                return self.response
+    def add_question_field(self):
+        """Добавляет поле для текущего вопроса"""
+        kwargs = {"label": self.question.text, "required": self.question.required}
 
-        if not self.user.is_authenticated:
-            self.response = None
-        else:
-            # Логика для множественного прохождения опроса
-            if self.survey.multiple_responses:
-                # Если разрешено множественное прохождение и не указан конкретный response_id,
-                # то возвращаем None (создаем новый Response)
-                self.response = None
-            else:
-                # Старая логика - ищем существующий Response пользователя
-                try:
-                    self.response = Response.objects.prefetch_related("user", "survey").get(
-                        user=self.user, survey=self.survey
-                    )
-                except Response.DoesNotExist:
-                    LOGGER.debug("No saved response for '%s' for user %s", self.survey, self.user)
-                    self.response = None
-        return self.response
-
-    def _get_preexisting_answers(self):
-        """Recover pre-existing answers in database.
-
-        The user must be logged. A Response containing the Answer must exists.
-        Will create an attribute containing the answers retrieved to avoid multiple
-        db calls.
-
-        :rtype: dict of Answer or None"""
-        if self.answers:
-            return self.answers
-
-        response = self._get_preexisting_response()
-        if response is None:
-            self.answers = None
-        try:
-            answers = Answer.objects.filter(response=response).prefetch_related("question")
-            self.answers = {answer.question.id: answer for answer in answers.all()}
-        except Answer.DoesNotExist:
-            self.answers = None
-
-        return self.answers
-
-    def _get_preexisting_answer(self, question):
-        """Recover a pre-existing answer in database.
-
-        The user must be logged. A Response containing the Answer must exists.
-
-        :param Question question: The question we want to recover in the
-        response.
-        :rtype: Answer or None"""
-        answers = self._get_preexisting_answers()
-        return answers.get(question.id, None)
-
-    def get_question_initial(self, question, data):
-        """Get the initial value that we should use in the Form
-
-        :param Question question: The question
-        :param dict data: Value from a POST request.
-        :rtype: String or None"""
-        initial = None
-        answer = self._get_preexisting_answer(question)
-        if answer:
-            # Initialize the field with values from the database if any
-            if question.type == Question.SELECT_MULTIPLE:
-                initial = []
-                if answer.body == "[]":
-                    pass
-                elif "[" in answer.body and "]" in answer.body:
-                    initial = []
-                    unformated_choices = answer.body[1:-1].strip()
-                    for unformated_choice in unformated_choices.split(settings.CHOICES_SEPARATOR):
-                        choice = unformated_choice.split("'")[1]
-                        initial.append(slugify(choice))
-                else:
-                    # Only one element
-                    initial.append(slugify(answer.body))
-            else:
-                initial = answer.body
-        if data:
-            # Initialize the field field from a POST request, if any.
-            # Replace values from the database
-            initial = data.get(f"question_{question.pk}")
-        return initial
-
-    def get_question_widget(self, question):
-        """Return the widget we should use for a question.
-
-        :param Question question: The question
-        :rtype: django.forms.widget or None"""
-        try:
-            return self.WIDGETS[question.type]
-        except KeyError:
-            return None
-
-    @staticmethod
-    def get_question_choices(question):
-        """Return the choices we should use for a question.
-
-        :param Question question: The question
-        :rtype: List of String or None"""
-        qchoices = None
-        if question.type not in [Question.TEXT, Question.SHORT_TEXT, Question.INTEGER, Question.FLOAT, Question.DATE]:
-            qchoices = question.get_choices()
-            # add an empty option at the top so that the user has to explicitly
-            # select one of the options
-            if question.type in [Question.SELECT, Question.SELECT_IMAGE]:
-                qchoices = tuple([("", "-------------")]) + qchoices
-        return qchoices
-
-    def get_question_field(self, question, **kwargs):
-        """Return the field we should use in our form.
-
-        :param Question question: The question
-        :param **kwargs: A dict of parameter properly initialized in
-            add_question.
-        :rtype: django.forms.fields"""
-        # logging.debug("Args passed to field %s", kwargs)
-        try:
-            return self.FIELDS[question.type](**kwargs)
-        except KeyError:
-            return forms.ChoiceField(**kwargs)
-
-    def add_question(self, question, data):
-        """Add a question to the form.
-
-        :param Question question: The question to add.
-        :param dict data: The pre-existing values from a post request."""
-        kwargs = {"label": question.text, "required": question.required}
-        initial = self.get_question_initial(question, data)
-        if initial:
-            kwargs["initial"] = initial
-        choices = self.get_question_choices(question)
-        if choices:
+        # Добавляем choices для вопросов с выбором
+        if self.question.type in [Question.RADIO, Question.SELECT, Question.SELECT_MULTIPLE, Question.SELECT_IMAGE]:
+            choices = self.question.get_choices()
+            if self.question.type in [Question.SELECT, Question.SELECT_IMAGE]:
+                choices = tuple([("", "-------------")]) + choices
             kwargs["choices"] = choices
-        widget = self.get_question_widget(question)
-        if widget:
-            kwargs["widget"] = widget
-        field = self.get_question_field(question, **kwargs)
-        field.widget.attrs["category"] = question.category.name if question.category else ""
 
-        if question.type == Question.DATE:
+        # Добавляем widget
+        if self.question.type in self.WIDGETS:
+            kwargs["widget"] = self.WIDGETS[self.question.type]()
+
+        # Создаем поле
+        if self.question.type in self.FIELDS:
+            field = self.FIELDS[self.question.type](**kwargs)
+        else:
+            field = forms.ChoiceField(**kwargs)
+
+        # Добавляем CSS класс для даты
+        if self.question.type == Question.DATE:
             field.widget.attrs["class"] = "date"
-        # logging.debug("Field for %s : %s", question, field.__dict__)
-        self.fields[f"question_{question.pk}"] = field
 
-    def has_next_step(self):
-        if not self.survey.is_all_in_one_page():
-            if self.step < self.steps_count - 1:
-                return True
-        return False
+        # Добавляем атрибут категории
+        field.widget.attrs["category"] = self.question.category.name if self.question.category else ""
 
-    def next_step_url(self):
-        if self.has_next_step():
-            context = {"id": self.survey.id, "step": self.step + 1}
-            return reverse("survey-detail-step", kwargs=context)
+        # Используем имя поля в формате question_<id> для совместимости со старыми тестами
+        self.fields[f"question_{self.question.pk}"] = field
 
-    def next_step_url_for_response(self, response_id):
-        """URL для следующего шага при редактировании конкретного Response"""
-        if self.has_next_step():
-            context = {"response_id": response_id, "step": self.step + 1}
-            return reverse("survey-response-detail-step", kwargs=context)
+    def set_initial_data(self):
+        """Устанавливает начальные данные из существующего ответа"""
+        try:
+            existing_answer = Answer.objects.get(response=self.response, question=self.question)
 
-    def current_step_url(self):
-        return reverse("survey-detail-step", kwargs={"id": self.survey.id, "step": self.step})
+            field_name = f"question_{self.question.pk}"
+
+            if self.question.type == Question.SELECT_MULTIPLE:
+                # Для множественного выбора нужно преобразовать строку в список
+                if (
+                    existing_answer.body
+                    and existing_answer.body.startswith("[")
+                    and existing_answer.body.endswith("]")
+                ):
+                    # Извлекаем значения из строки вида "['value1', 'value2']"
+                    values_str = existing_answer.body[1:-1]
+                    if values_str:
+                        values = []
+                        for part in values_str.split(settings.CHOICES_SEPARATOR):
+                            # Извлекаем значение между кавычками
+                            if "'" in part:
+                                value = part.split("'")[1]
+                                values.append(slugify(value))
+                        self.fields[field_name].initial = values
+                else:
+                    # Одно значение
+                    if existing_answer.body:
+                        self.fields[field_name].initial = [slugify(existing_answer.body)]
+            else:
+                # Для остальных типов вопросов
+                if self.question.type in [Question.RADIO, Question.SELECT, Question.SELECT_IMAGE]:
+                    # Для вопросов с выбором нужно найти slug
+                    if existing_answer.body:
+                        choices = dict(self.question.get_choices())
+                        # Ищем ключ по значению
+                        for key, value in choices.items():
+                            if value == existing_answer.body:
+                                self.fields[field_name].initial = key
+                                break
+                else:
+                    # Для текстовых и числовых вопросов
+                    self.fields[field_name].initial = existing_answer.body
+
+        except Answer.DoesNotExist:
+            pass
 
     def save(self, commit=True):
-        """Save the response object"""
-        # Recover an existing response from the database if any
-        #  There is only one response by logged user.
-        response = self._get_preexisting_response()
-        if not self.survey.editable_answers and response is not None:
+        """
+        Сохраняет ответ в базу данных.
+
+        Returns:
+            Answer: Сохраненный объект ответа
+        """
+        if not self.is_valid():
+            raise ValueError("Form is not valid")
+
+        # Получаем или создаем Response
+        if self.response is None:
+            # Создаем новый Response
+            user = None
+            if hasattr(self, "user") and self.user.is_authenticated:
+                user = self.user
+            self.response = Response.objects.create(
+                survey=self.question.survey,
+                user=user,
+                interview_uuid=uuid.uuid4().hex,
+            )
+
+        # Получаем значение ответа из поля question_<id>
+        field_name = f"question_{self.question.pk}"
+        answer_value = self.cleaned_data[field_name]
+
+        # Преобразуем значение в зависимости от типа вопроса
+        if self.question.type in [Question.RADIO, Question.SELECT, Question.SELECT_MULTIPLE, Question.SELECT_IMAGE]:
+            choices = dict(self.question.get_choices())
+            if self.question.type == Question.SELECT_MULTIPLE:
+                # Для множественного выбора
+                selected_values = []
+                for val in answer_value:
+                    if val in choices:
+                        selected_values.append(choices[val])
+                body_value = str(selected_values)
+            else:
+                # Для одиночного выбора
+                body_value = choices.get(answer_value, str(answer_value))
+        else:
+            body_value = str(answer_value)
+
+        # Получаем или создаем Answer
+        answer, created = Answer.objects.get_or_create(
+            response=self.response, question=self.question, defaults={"body": body_value}
+        )
+
+        if not created:
+            # Обновляем существующий ответ
+            answer.body = body_value
+            answer.save()
+
+        return answer
+
+    def get_previous_answer_info(self):
+        """
+        Получает информацию о предыдущем ответе для отображения его правильности.
+
+        Returns:
+            dict: Информация о предыдущем ответе или None
+        """
+        if not self.response:
             return None
-        if response is None:
-            response = super().save(commit=False)
-        response.survey = self.survey
-        response.interview_uuid = self.uuid
-        if self.user.is_authenticated:
-            response.user = self.user
-        response.save()
-        # response "raw" data as dict (for signal)
-        data = {"survey_id": response.survey.id, "interview_uuid": response.interview_uuid, "responses": []}
-        # create an answer object for each question and associate it with this
-        # response.
-        for field_name, field_value in list(self.cleaned_data.items()):
-            if field_name.startswith("question_"):
-                # warning: this way of extracting the id is very fragile and
-                # entirely dependent on the way the question_id is encoded in
-                # the field name in the __init__ method of this form class.
-                q_id = int(field_name.split("_")[1])
-                question = Question.objects.get(pk=q_id)
-                answer = self._get_preexisting_answer(question)
-                if answer is None:
-                    answer = Answer(question=question)
-                if question.type == Question.SELECT_IMAGE:
-                    value, img_src = field_value.split(":", 1)
-                    # TODO Handling of SELECT IMAGE
-                    LOGGER.debug("Question.SELECT_IMAGE not implemented, please use : %s and %s", value, img_src)
 
-                # Сохраняем оригинальное значение из choices
-                if question.type in [Question.RADIO, Question.SELECT, Question.SELECT_MULTIPLE, Question.SELECT_IMAGE]:
-                    choices = dict(question.get_choices())
-                    if question.type == Question.SELECT_MULTIPLE:
-                        # Для множественного выбора
-                        selected_values = []
-                        for val in field_value:
-                            if val in choices:
-                                selected_values.append(choices[val])
-                        answer.body = str(selected_values)
-                    else:
-                        # Для одиночного выбора
-                        if field_value in choices:
-                            answer.body = choices[field_value]
-                else:
-                    answer.body = field_value
+        try:
+            previous_answer = Answer.objects.get(response=self.response, question=self.question)
 
-                data["responses"].append((answer.question.id, answer.body))
-                LOGGER.debug("Creating answer for question %d of type %s : %s", q_id, answer.question.type, field_value)
-                answer.response = response
-                answer.save()
-        survey_completed.send(sender=Response, instance=response, data=data)
-        return response
+            return {
+                "question_text": self.question.text,
+                "user_answer": previous_answer.display_value,
+                "is_correct": previous_answer.is_correct,
+                "correct_answer": self.question.display_correct_answer,
+                "question_type": self.question.type,
+            }
+        except Answer.DoesNotExist:
+            return None
+
+
+# Формы для пошагового прохождения опроса
+class SurveyIntroForm(forms.Form):
+    """Форма для вводной страницы опроса"""
+
+    start_survey = forms.BooleanField(required=True, widget=forms.HiddenInput, initial=True)
+
+
+class QuestionAnswerForm(forms.Form):
+    """Форма для ответа на вопрос"""
+
+    def __init__(self, question, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.question = question
+        self._build_fields()
+
+    def _build_fields(self):
+        """Строит поля формы в зависимости от типа вопроса"""
+        field_name = f"question_{self.question.id}"
+
+        if self.question.type == Question.TEXT:
+            self.fields[field_name] = forms.CharField(
+                label=self.question.text,
+                widget=forms.Textarea(attrs={"rows": 4, "class": "form-control"}),
+                required=self.question.required,
+            )
+        elif self.question.type == Question.SHORT_TEXT:
+            self.fields[field_name] = forms.CharField(
+                label=self.question.text,
+                widget=forms.TextInput(attrs={"class": "form-control"}),
+                required=self.question.required,
+            )
+        elif self.question.type == Question.RADIO:
+            choices = [(choice.strip(), choice.strip()) for choice in self.question.get_clean_choices()]
+            self.fields[field_name] = forms.ChoiceField(
+                label=self.question.text,
+                choices=choices,
+                widget=forms.RadioSelect(attrs={"class": "form-check-input"}),
+                required=self.question.required,
+            )
+        elif self.question.type == Question.SELECT:
+            choices = [(choice.strip(), choice.strip()) for choice in self.question.get_clean_choices()]
+            self.fields[field_name] = forms.ChoiceField(
+                label=self.question.text,
+                choices=choices,
+                widget=forms.Select(attrs={"class": "form-select"}),
+                required=self.question.required,
+            )
+        elif self.question.type == Question.SELECT_MULTIPLE:
+            choices = [(choice.strip(), choice.strip()) for choice in self.question.get_clean_choices()]
+            self.fields[field_name] = forms.MultipleChoiceField(
+                label=self.question.text,
+                choices=choices,
+                widget=forms.CheckboxSelectMultiple(attrs={"class": "form-check-input"}),
+                required=self.question.required,
+            )
+        elif self.question.type == Question.INTEGER:
+            self.fields[field_name] = forms.IntegerField(
+                label=self.question.text,
+                widget=forms.NumberInput(attrs={"class": "form-control"}),
+                required=self.question.required,
+            )
+        elif self.question.type == Question.FLOAT:
+            self.fields[field_name] = forms.FloatField(
+                label=self.question.text,
+                widget=forms.NumberInput(attrs={"class": "form-control", "step": "0.01"}),
+                required=self.question.required,
+            )
+        elif self.question.type == Question.DATE:
+            self.fields[field_name] = forms.DateField(
+                label=self.question.text,
+                widget=forms.DateInput(attrs={"class": "form-control", "type": "date"}),
+                required=self.question.required,
+            )
+        else:
+            # По умолчанию текстовое поле
+            self.fields[field_name] = forms.CharField(
+                label=self.question.text,
+                widget=forms.TextInput(attrs={"class": "form-control"}),
+                required=self.question.required,
+            )
+
+    def get_answer_value(self):
+        """Возвращает значение ответа в правильном формате"""
+        field_name = f"question_{self.question.id}"
+        if field_name not in self.cleaned_data:
+            return None
+
+        value = self.cleaned_data[field_name]
+
+        # Для множественного выбора преобразуем в список
+        if self.question.type == Question.SELECT_MULTIPLE:
+            if isinstance(value, list):
+                return value
+            return [value] if value else []
+
+        return value

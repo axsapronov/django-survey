@@ -12,9 +12,8 @@ class Category(models.Model):
     description = models.CharField(_("Description"), max_length=2000, blank=True, null=True)
 
     class Meta:
-        # pylint: disable=too-few-public-methods
-        verbose_name = _("category")
-        verbose_name_plural = _("categories")
+        verbose_name = _("Category")
+        verbose_name_plural = _("Categories")
 
     def __str__(self):
         return self.name

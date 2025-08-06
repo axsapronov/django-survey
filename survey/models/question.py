@@ -3,6 +3,7 @@ import logging
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.urls import reverse
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 
@@ -86,14 +87,17 @@ class Question(models.Model):
     correct_answer = models.TextField(_("Correct Answer"), blank=True, null=True, help_text=CORRECT_ANSWER_HELP_TEXT)
 
     class Meta:
-        verbose_name = _("question")
-        verbose_name_plural = _("questions")
+        verbose_name = _("Question")
+        verbose_name_plural = _("Questions")
         ordering = ("survey", "order")
 
     def save(self, *args, **kwargs):
         if self.type in [Question.RADIO, Question.SELECT, Question.SELECT_MULTIPLE]:
             validate_choices(self.choices)
         super().save(*args, **kwargs)
+
+    def get_absolute_url(self):
+        return reverse("survey:question-detail", kwargs={"survey_id": self.survey_id, "question_id": self.id})
 
     @property
     def display_correct_answer(self):
