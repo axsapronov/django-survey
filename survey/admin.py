@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.utils.html import mark_safe
 from django.utils.translation import gettext_lazy as _
-
+from django.utils.translation import ngettext
 
 from survey.models import Answer
 from survey.models import Category
@@ -9,10 +9,8 @@ from survey.models import Question
 from survey.models import Response
 from survey.models import Survey
 
-from django.utils.translation import gettext_lazy as _
-from django.utils.translation import ngettext
 
-
+@admin.action(description=_("Mark selected surveys as published"))
 def make_published(modeladmin, request, queryset):
     """
     Mark the given survey as published
@@ -24,9 +22,6 @@ def make_published(modeladmin, request, queryset):
         count,
     ) % {"count": count}
     modeladmin.message_user(request, message)
-
-
-make_published.short_description = _("Mark selected surveys as published")
 
 
 class QuestionInline(admin.StackedInline):

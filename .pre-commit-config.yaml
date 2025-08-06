@@ -1,5 +1,6 @@
 default_language_version:
   python: python3.12
+
 exclude: ^docs/|/migrations/|Makefile|.devcontainer/devcontainer.json|.json|/project/static/js/libs|/project/static/css/tabler.*\.(css|css\.map)$|/project/static/js/tabler.*\.(js|js\.map)$
 
 repos:

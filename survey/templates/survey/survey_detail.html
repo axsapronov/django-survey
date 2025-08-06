@@ -8,9 +8,9 @@
 <form method="post">
     {% csrf_token %}
     {{ form.start_survey }}
-    <button type="submit" 
+    <button type="submit"
     class="btn btn-primary mt-2 w-25">
-        {% trans "Start the Quiz" %} 
+        {% trans "Start the Quiz" %}
         <i class="ti ti-arrow-narrow-right icon icon-tabler ms-1"></i>
     </button>
 </form>
@@ -25,14 +25,14 @@
 <div class="row g-4 mt-2">
     <!-- Левая колонка -->
     <div class="col-lg-8 col-12">
-  
-  
+
+
       <div class="card markdown h-100">
         <div class="card-body">
-  
-  
+
+
           <div class="lh-lg">{{ object.description|safe }}</div>
-          
+
         </div>
       </div>
     </div>
@@ -54,9 +54,9 @@
 
 
   </div>
-  
 
-  
+
+
 
 
 
@@ -92,7 +92,7 @@
 
 
 
-{% comment %} 
+{% comment %}
 
 
 
@@ -101,7 +101,7 @@
 <div class="text-center mb-5">
     <h1 class="h3 text-muted fw-light mb-1">{% trans "Интерактивный опрос" %}</h1>
     <div class="d-flex align-items-center justify-content-center mb-2">
-        <span class="h4 fw-bold  me-2">    
+        <span class="h4 fw-bold  me-2">
             {{ total_questions }} {{ total_questions|pluralize_ru:"вопрос,вопроса,вопросов" }}
         </span>
     </div>
@@ -117,4 +117,4 @@
  {% endcomment %}
 
 
-{% endblock body %} 
+{% endblock body %}

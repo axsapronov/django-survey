@@ -1,6 +1,6 @@
-from functools import cached_property
 import uuid
 from datetime import timedelta
+from functools import cached_property
 
 from django.conf import settings
 from django.db import models

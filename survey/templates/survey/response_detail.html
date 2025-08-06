@@ -53,9 +53,9 @@
                 <div class="card-body">
                     <h5 class="card-title">{% trans "Общий результат" %}</h5>
                     <div class="progress" style="height: 25px;">
-                        <div class="progress-bar bg-success" role="progressbar" 
-                             style="width: {{ correct_percentage }}%" 
-                             aria-valuenow="{{ correct_percentage }}" 
+                        <div class="progress-bar bg-success" role="progressbar"
+                             style="width: {{ correct_percentage }}%"
+                             aria-valuenow="{{ correct_percentage }}"
                              aria-valuemin="0" aria-valuemax="100">
                             {{ correct_percentage }}%
                         </div>
@@ -75,7 +75,7 @@
                             <div class="col-md-8">
                                 <h5 class="question-number">{% trans "Вопрос" %} {{ forloop.counter }}</h5>
                                 <p class="question-text">{{ answer_data.question.text }}</p>
-                                
+
                                 <div class="answer-section">
                                     <strong>{% trans "Ваш ответ:" %}</strong>
                                     <p class="user-answer {% if answer_data.is_correct %}text-success{% else %}text-danger{% endif %}">
@@ -197,4 +197,4 @@
     margin: 0 5px;
 }
 </style>
-{% endblock body %} 
+{% endblock body %}

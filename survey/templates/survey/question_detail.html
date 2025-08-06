@@ -16,9 +16,9 @@
                         <span class="text-muted">{{ current_question_index }} / {{ total_questions }}</span>
                     </div>
                     <div class="progress" style="height: 10px;">
-                        <div class="progress-bar bg-primary" role="progressbar" 
-                             style="width: {{ progress_percentage }}%" 
-                             aria-valuenow="{{ progress_percentage }}" 
+                        <div class="progress-bar bg-primary" role="progressbar"
+                             style="width: {{ progress_percentage }}%"
+                             aria-valuenow="{{ progress_percentage }}"
                              aria-valuemin="0" aria-valuemax="100">
                         </div>
                     </div>
@@ -46,7 +46,7 @@
                                     {% endif %}
                                 </button>
                             </div>
-                            
+
                         </form>
                     {% else %}
                         <!-- Показываем вопрос без формы после ответа -->
@@ -80,4 +80,4 @@
     </div>
 </div>
 
-{% endblock body %} 
+{% endblock body %}

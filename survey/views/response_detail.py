@@ -14,6 +14,7 @@ LOGGER = logging.getLogger(__name__)
 
 class ResponseDetailView(View):
     template_name = "survey/response_detail.html"
+
     def get(self, request, *args, **kwargs):
         response_id = kwargs.get("response_id")
         survey_id = kwargs.get("survey_id")
