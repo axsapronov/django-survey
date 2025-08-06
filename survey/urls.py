@@ -1,48 +1,16 @@
 from django.urls import path
-from django.urls import re_path
 
-from survey.views import ConfirmView
-from survey.views import ResponseDetail
-from survey.views import SurveyCompleted
-from survey.views import SurveyDetail
+from survey.views import ResponseDetailView
+from survey.views import ResponseListView
+from survey.views import SurveyDetailView
 from survey.views import SurveyListView
-from survey.views import UserResponsesView
+from survey.views.question_detail import QuestionDetailView
 
+app_name = "survey"
 urlpatterns = [
     path("", SurveyListView.as_view(), name="survey-list"),
-    path(
-        "<int:id>/",
-        SurveyDetail.as_view(),
-        name="survey-detail",
-    ),
-    re_path(
-        r"^(?P<id>\d+)/completed/",
-        SurveyCompleted.as_view(),
-        name="survey-completed",
-    ),
-    re_path(
-        r"^(?P<id>\d+)-(?P<step>\d+)/",
-        SurveyDetail.as_view(),
-        name="survey-detail-step",
-    ),
-    path(
-        "<int:survey_id>/responses/",
-        UserResponsesView.as_view(),
-        name="survey-user-responses",
-    ),
-    re_path(
-        r"^response/(?P<response_id>\d+)/",
-        ResponseDetail.as_view(),
-        name="survey-response-detail",
-    ),
-    re_path(
-        r"^response/(?P<response_id>\d+)-(?P<step>\d+)/",
-        ResponseDetail.as_view(),
-        name="survey-response-detail-step",
-    ),
-    re_path(
-        r"^confirm/(?P<uuid>\w+)/",
-        ConfirmView.as_view(),
-        name="survey-confirmation",
-    ),
+    path("<int:survey_id>/", SurveyDetailView.as_view(), name="survey-detail"),
+    path("<int:survey_id>/question/", QuestionDetailView.as_view(), name="question-detail"),
+    path("<int:survey_id>/response/", ResponseListView.as_view(), name="response-list"),
+    path("<int:survey_id>/response/<int:response_id>/", ResponseDetailView.as_view(), name="response-detail"),
 ]
