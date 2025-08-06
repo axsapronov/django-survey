@@ -80,6 +80,8 @@ INSTALLED_APPS = (
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.sites",
+    "django_pluralize_ru",
+    "crispy_forms",
     "survey",
 )
 

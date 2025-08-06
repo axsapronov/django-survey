@@ -93,8 +93,7 @@ class TestQuestionDetailView:
         assert context["survey"] == survey
         assert context["question"] == question
         assert context["current_question_index"] == 1
-        assert context["total_questions"] == 1
-        assert context["progress_percentage"] == 0
+        assert context["progress_percentage"] == 3
 
     def test_get_context_data_with_correct_answer_after_post(self):
         """Тест контекста с правильным ответом после POST"""

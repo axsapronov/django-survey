@@ -50,11 +50,12 @@ class QuestionDetailView(FormView):
         context["survey"] = self.survey
         context["question"] = self.current_question
         context["current_question_index"] = self.current_question_index + 1
-        context["total_questions"] = self.survey.total_questions
 
         context["progress_percentage"] = int((self.current_question_index) / self.survey.total_questions * 100) or 3
 
         # Показываем правильный ответ только после POST запроса
+        context["show_correct_answer"] = True
+
         if self.request.method == "POST" and self.current_question.correct_answer:
             context["correct_answer"] = self.current_question.correct_answer
             context["show_correct_answer"] = True

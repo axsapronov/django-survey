@@ -69,7 +69,6 @@ class ResponseDetailView(View):
             "survey": survey,
             "response": response,
             "answers_data": answers_data,
-            "total_questions": response.total_answers_count,
             "correct_answers": response.correct_answers_count,
             "correct_percentage": response.correct_answers_percentage,
         }

@@ -150,7 +150,6 @@ class TestResponseDetailView:
         assert context["survey"] == survey
         assert context["response"] == response
         assert "answers_data" in context
-        assert context["total_questions"] == 1
         assert context["correct_answers"] == 0  # Ответ неправильный
         assert context["correct_percentage"] == 0
 
@@ -191,7 +190,6 @@ class TestResponseDetailView:
 
         context = view._build_results_context(survey, response)
 
-        assert context["total_questions"] == 2
         assert context["correct_answers"] == 1
         assert context["correct_percentage"] == 50
 

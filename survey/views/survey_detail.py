@@ -31,7 +31,6 @@ class SurveyDetailView(FormView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["object"] = context["survey"] = self.survey
-        context["total_questions"] = self.survey.total_questions
         return context
 
     def form_valid(self, form):

@@ -74,7 +74,6 @@ class TestSurveyDetailView:
         context = view.get_context_data()
 
         assert context["survey"] == survey
-        assert "total_questions" in context
 
     def test_form_valid_creates_session_and_redirects(self):
         """Тест создания сессии при валидной форме"""

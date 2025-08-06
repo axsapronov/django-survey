@@ -8,25 +8,24 @@
     <div class="row justify-content-center">
         <div class="col-md-12">
 
-            <!-- Прогресс бар -->
-            <div class="card mb-3 card-backgroundless">
-                <div class="card-body ">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span class="text-muted">{% trans "Прогресс" %}</span>
-                        <span class="text-muted">{{ current_question_index }} / {{ total_questions }}</span>
-                    </div>
-                    <div class="progress" style="height: 10px;">
-                        <div class="progress-bar bg-primary" role="progressbar"
-                             style="width: {{ progress_percentage }}%"
-                             aria-valuenow="{{ progress_percentage }}"
-                             aria-valuemin="0" aria-valuemax="100">
-                        </div>
-                    </div>
-                </div>
-            </div>
+
 
             <!-- Вопрос -->
             <div class="card">
+                <div class="progress progress-1 progress-sm card-progress">
+                    <div
+                        class="progress-bar"
+                        style="width: {{ progress_percentage }}%"
+                        role="progressbar"
+                        aria-valuenow="{{ progress_percentage }}"
+                        aria-valuemin="0"
+                        aria-valuemax="100"
+                        aria-label="{{ progress_percentage }}% Complete">
+                      <span class="visually-hidden">{{ progress_percentage }}% Complete</span>
+                    </div>
+                  </div>
+
+
                 <div class="card-body">
                     {% if not show_correct_answer %}
                         <form method="post" id="question-form" class="space-e">
@@ -35,14 +34,11 @@
 
 
                             <div class="d-flex justify-content-between">
-                                <a href="{{ survey.get_absolute_url }}" class="btn btn-secondary">
-                                    <i class="fas fa-arrow-left me-2"></i>{% trans "Назад к введению" %}
-                                </a>
                                 <button type="submit" class="btn btn-primary" name="action_add">
-                                    {% if current_question_index == total_questions %}
+                                    {% if current_question_index == survey.total_questions %}
                                         <i class="fas fa-check me-2"></i>{% trans "Завершить опрос" %}
                                     {% else %}
-                                        <i class="fas fa-arrow-right me-2"></i>{% trans "Следующий вопрос" %}
+                                        <i class="fas fa-arrow-right me-2"></i>{% trans "Check your answer" %}
                                     {% endif %}
                                 </button>
                             </div>
