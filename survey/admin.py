@@ -56,10 +56,10 @@ class SurveyAdmin(admin.ModelAdmin):
         "name",
         "id",
         "is_published",
-        "page",
         "need_logged_user",
         "multiple_responses",
         "template",
+        "page",
         "total_questions_display",
     )
     list_filter = (
@@ -83,10 +83,10 @@ class SurveyAdmin(admin.ModelAdmin):
 
 class AnswerBaseInline(admin.StackedInline):
     fields = (
-        "is_correct",
         "question",
-        "correct_answer_display",
         "body",
+        "is_correct",
+        "correct_answer_display",
     )
     readonly_fields = (
         "question",
@@ -122,10 +122,10 @@ class ResponseAdmin(admin.ModelAdmin):
     search_fields = ("interview_uuid", "user__username")
     readonly_fields = (
         "survey",
+        "user",
+        "interview_uuid",
         "created",
         "updated",
-        "interview_uuid",
-        "user",
         "correct_answers_display",
     )
 
@@ -157,6 +157,21 @@ class QuestionAdmin(admin.ModelAdmin):
         "survey__name",
     )
     inlines = [AnswerBaseInline]
+
+
+@admin.register(Category)
+class CategoryAdmin(admin.ModelAdmin):
+    list_display = (
+        "name",
+        "survey",
+        "order",
+        "description",
+    )
+    list_filter = ("survey",)
+    search_fields = (
+        "name",
+        "survey__name",
+    )
 
 
 @admin.register(Answer)
