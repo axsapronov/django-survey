@@ -1,24 +1,44 @@
-[build-system]
-build-backend = "poetry.core.masonry.api"
-
-# ==== pytest ====
-requires = [ "poetry-core>=1", "setuptools<72" ]
-
-[project]
+[tool.poetry]
 name = "django-survey-axsapronov"
-version = "1.0.0"
-description = "A django survey app that can export results as CSV or PDF using your native language."
-readme = "README.md"
-license = { text = "AGPL-3.0" }
+version = "2.0.1"
+description = "Мощное Django приложение для создания и управления опросами, анкетами и тестами с поддержкой различных типов вопросов, категорий и аналитики"
 authors = [
-  { email = "pierre.sassoulas@gmail.com", name = "Pierre SASSOULAS" },
+  "Pierre SASSOULAS <pierre.sassoulas@gmail.com>",
+  "Alexander Sapronov <axsapronov@gmail.com>"
 ]
-requires-python = ">=3.12"
+maintainers = [
+  "Alexander Sapronov <axsapronov@gmail.com>"
+]
+readme = "README.md"
+license = "AGPL-3.0"
+homepage = "https://github.com/Pierre-Sassoulas/django-survey"
+repository = "https://github.com/Pierre-Sassoulas/django-survey"
+documentation = "https://github.com/Pierre-Sassoulas/django-survey#readme"
+keywords = [
+  "django",
+  "survey",
+  "poll",
+  "questionnaire",
+  "quiz",
+  "forms",
+  "data-collection",
+  "analytics",
+  "statistics",
+  "web-application"
+]
 classifiers = [
   "Development Status :: 5 - Production/Stable",
   "Environment :: Web Environment",
   "Framework :: Django",
+  "Framework :: Django :: 4.0",
+  "Framework :: Django :: 4.1",
+  "Framework :: Django :: 4.2",
+  "Framework :: Django :: 5.0",
+  "Framework :: Django :: 5.1",
+  "Framework :: Django :: 5.2",
   "Intended Audience :: Developers",
+  "Intended Audience :: Education",
+  "Intended Audience :: End Users/Desktop",
   "License :: OSI Approved :: GNU Affero General Public License v3",
   "Natural Language :: English",
   "Natural Language :: Russian",
@@ -26,46 +46,40 @@ classifiers = [
   "Programming Language :: Python :: 3 :: Only",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
+  "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
+  "Topic :: Software Development :: Libraries :: Python Modules",
   "Topic :: Utilities",
+  "Typing :: Typed"
 ]
-dependencies = [
-  "django>=4,<6",
-  "pytz>=2018.9",
-  "pyyaml>=4.2b1",
-]
-
-optional-dependencies.dev = [
-  "colorama",
-  "coverage",
-  "coveralls",
-  "django-rosetta",
-  "pre-commit",
-  "pylint>=3.3.5",
-  "pylint-django",
-  "pytest",
-  "pytest-django",
-  "python-coveralls",
-  "setuptools",
-]
-
-optional-dependencies.seo = [
-  "django-meta",
-]
-
-urls."Bug Tracker" = "https://github.com/Pierre-Sassoulas/django-survey/issues"
-urls."Source Code" = "https://github.com/Pierre-Sassoulas/django-survey"
-
-[tool.poetry]
 package-mode = true
 packages = [ { include = "survey" } ]
+
+[tool.poetry.dependencies]
+python = ">=3.12,<3.15"
+django = "^4.2,<6.0"
+pytz = "^2025.1"
+pyyaml = "^6.0.1"
+django-meta = "^2.5.0"
 
 [tool.poetry.group.dev.dependencies]
 twine = "^6.1.0"
 factory-boy = "^3.3.3"
-pylint-django = { version = "^2.6.1", python = ">=3.13,<3.15" }
+pylint-django = "^2.6.1"
+pre-commit = "^4.2.0"
+pylint = "^3.3.5"
+pytest = "^8.4.1"
+pytest-django = "^4.8.0"
+pytest-xdist = "^3.8.0"
+coverage = "^7.4.1"
+ruff = "^0.12.7"
 
 [tool.setuptools.packages.find]
 include = [ "survey*" ]
+
+
+[build-system]
+build-backend = "poetry.core.masonry.api"
+requires = [ "poetry-core>=1" ]
 
 [tool.ruff]
 # Assume Python 3.8
@@ -187,17 +201,91 @@ generated-members = [
 
 [tool.pytest.ini_options]
 minversion = "6.0"
-addopts = "--ds=project.settings.test --reuse-db --import-mode=importlib"
+addopts = [
+  "--ds=survey.settings",
+  "--reuse-db",
+  "--import-mode=importlib",
+  "--strict-markers",
+  "--strict-config",
+  "--tb=short",
+  "--maxfail=10",
+  "--durations=10"
+]
 python_files = [
   "tests.py",
   "test_*.py",
   "*_tests.py",
 ]
+python_classes = [
+  "Test*",
+]
+python_functions = [
+  "test_*",
+]
+markers = [
+  "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+  "integration: marks tests as integration tests",
+  "unit: marks tests as unit tests",
+  "django_db: marks tests that require database access",
+]
+testpaths = [
+  "survey/tests",
+]
+filterwarnings = [
+  "ignore::DeprecationWarning",
+  "ignore::PendingDeprecationWarning",
+]
 
 [tool.coverage.run]
-include = [ "project/**" ]
-omit = [ "*/migrations/*", "*/tests/*" ]
-plugins = [ "django_coverage_plugin" ]
+include = [
+  "survey/**",
+  "project/**"
+]
+omit = [
+  "*/migrations/*",
+  "*/tests/*",
+  "*/test_*.py",
+  "*/__pycache__/*",
+  "*/venv/*",
+  "*/env/*",
+  "*/build/*",
+  "*/dist/*",
+  "*/site-packages/*",
+  "*/manage.py",
+  "*/wsgi.py",
+  "*/asgi.py",
+  "*/settings.py",
+  "*/urls.py"
+]
+plugins = [
+  "django_coverage_plugin"
+]
+branch = true
+source = [
+  "survey",
+  "project"
+]
+
+[tool.coverage.report]
+exclude_lines = [
+  "pragma: no cover",
+  "def __repr__",
+  "if self.debug:",
+  "if settings.DEBUG",
+  "raise AssertionError",
+  "raise NotImplementedError",
+  "if 0:",
+  "if __name__ == .__main__.:",
+  "class .*\\bProtocol\\):",
+  "@(abc\\.)?abstractmethod",
+]
+show_missing = true
+precision = 2
+fail_under = 80
+
+[tool.coverage.html]
+directory = "htmlcov"
+title = "Django Survey Coverage Report"
 
 # ==== isort ====
 
@@ -223,3 +311,20 @@ indent_size = 2
 
 [tool.djlint.js]
 indent_size = 2
+
+
+[tool.bumpversion]
+current_version = "2.0.1"
+commit = true
+commit_args = "--no-verify"
+tag = true
+tag_name = "{new_version}"
+allow_dirty = true
+parse = "(?P<major>\\d+)\\.(?P<minor>\\d+)\\.(?P<patch>\\d+)"
+serialize = [
+    "{major}.{minor}.{patch}"
+]
+message = "Version updated from {current_version} to {new_version}"
+
+[[tool.bumpversion.files]]
+filename = "pyproject.toml"

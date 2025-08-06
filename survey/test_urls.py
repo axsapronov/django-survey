@@ -11,7 +11,7 @@ from django.urls.base import reverse
 
 def home(request):
     """Permit to not get 404 while testing."""
-    return redirect(reverse("survey-list"))
+    return redirect(reverse("survey:survey-list"))
 
 
 urlpatterns = [

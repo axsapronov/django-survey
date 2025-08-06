@@ -19,7 +19,7 @@ install: install-requirements install-check
 	echo "Done"
 
 test:
-	poetry run python manage.py test
+	poetry run pytest -n 3
 
 i18n-collect:
 	poetry run python manage.py makemessages --all --no-location --ignore=env --no-obsolete --no-wrap
