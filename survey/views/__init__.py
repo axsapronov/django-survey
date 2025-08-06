@@ -1,8 +1,13 @@
-from .confirm_view import ConfirmView
-from .response_detail import ResponseDetail
-from .survey_completed import SurveyCompleted
-from .survey_detail import SurveyDetail
+from .question_detail import QuestionDetailView
+from .response_detail import ResponseDetailView
+from .response_list import ResponseListView
+from .survey_detail import SurveyDetailView
 from .survey_list import SurveyListView
-from .user_responses import UserResponsesView
 
-__all__ = ["ConfirmView", "ResponseDetail", "SurveyCompleted", "SurveyDetail", "SurveyListView", "UserResponsesView"]
+__all__ = [
+    "ResponseDetailView",
+    "SurveyListView",
+    "ResponseListView",
+    "SurveyDetailView",
+    "QuestionDetailView",
+]
