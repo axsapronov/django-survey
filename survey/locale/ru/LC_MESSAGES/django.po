@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-06-20 15:02+0000\n"
+"POT-Creation-Date: 2025-08-06 07:04+0000\n"
 "PO-Revision-Date: 2019-03-10 22:53+0230\n"
 "Last-Translator: b'  <vladm.ru@gmail.com>'\n"
 "Language-Team: \n"
@@ -38,27 +38,27 @@ msgstr[1] "опросы %(count)d помечены как опубликован
 msgid "Mark selected surveys as published"
 msgstr "Помечено как опублиовано"
 
-#: survey/admin.py:61
+#: survey/admin.py:63
 #, fuzzy
 #| msgid "questions"
 msgid "Total questions"
 msgstr "вопросы"
 
-#: survey/admin.py:81
+#: survey/admin.py:83
 msgid "Is correct"
 msgstr ""
 
-#: survey/admin.py:85
+#: survey/admin.py:87
 #, fuzzy
 #| msgid "Correct answers"
 msgid "Correct answer"
 msgstr "Правильные ответы"
 
-#: survey/admin.py:89
+#: survey/admin.py:91
 msgid "Not set"
 msgstr ""
 
-#: survey/admin.py:116 survey/templates/survey/user_responses.html:26
+#: survey/admin.py:119 survey/templates/survey/user_responses.html:26
 msgid "Correct answers"
 msgstr "Правильные ответы"
 
@@ -177,27 +177,39 @@ msgstr ""
 msgid "Export to PDF"
 msgstr "Экспорт в PDF"
 
-#: survey/models/answer.py:22
+#: survey/models/answer.py:25
 msgid "Question"
 msgstr "Вопрос"
 
-#: survey/models/answer.py:23
+#: survey/models/answer.py:31
 msgid "Response"
 msgstr "Ответ"
 
-#: survey/models/answer.py:24 survey/models/response.py:25
+#: survey/models/answer.py:35 survey/models/response.py:25
 msgid "Creation date"
 msgstr "Дата создания"
 
-#: survey/models/answer.py:25 survey/models/response.py:26
+#: survey/models/answer.py:39 survey/models/response.py:26
 msgid "Update date"
 msgstr "Дата обновления"
 
-#: survey/models/answer.py:26
+#: survey/models/answer.py:43
 msgid "Content"
 msgstr "Содержание"
 
-#: survey/models/category.py:9 survey/models/survey.py:30
+#: survey/models/answer.py:50
+#, fuzzy
+#| msgid "No answers"
+msgid "Answer"
+msgstr "Нет ответов"
+
+#: survey/models/answer.py:51
+#, fuzzy
+#| msgid "No answers"
+msgid "Answers"
+msgstr "Нет ответов"
+
+#: survey/models/category.py:9 survey/models/survey.py:41
 msgid "Name"
 msgstr "Название"
 
@@ -210,7 +222,7 @@ msgstr "Тест"
 msgid "Display order"
 msgstr "Порядок отображения"
 
-#: survey/models/category.py:12 survey/models/survey.py:31
+#: survey/models/category.py:12 survey/models/survey.py:42
 msgid "Description"
 msgstr "Описание"
 
@@ -332,61 +344,61 @@ msgstr "Набор ответов на опросы"
 msgid "Sets of answers to surveys"
 msgstr "Наборы ответов на опросы"
 
-#: survey/models/survey.py:22
+#: survey/models/survey.py:26
 msgid "By question"
 msgstr "По вопросам"
 
-#: survey/models/survey.py:23
+#: survey/models/survey.py:27
 msgid "By category"
 msgstr "По категориям"
 
-#: survey/models/survey.py:24
+#: survey/models/survey.py:28
 msgid "All in one page"
 msgstr "Все в одной странице"
 
-#: survey/models/survey.py:32
+#: survey/models/survey.py:43
 msgid "Users can see it and answer it"
 msgstr "Пользователи могут увидеть его и ответить на него"
 
-#: survey/models/survey.py:33
+#: survey/models/survey.py:44
 msgid "Only authenticated users can see it and answer it"
 msgstr "Только прошедшие проверку пользователи могут видеть его и отвечать на него"
 
-#: survey/models/survey.py:34
+#: survey/models/survey.py:45
 msgid "Users can edit their answers afterwards"
 msgstr "Пользователи могут редактировать свои ответы впоследствии"
 
-#: survey/models/survey.py:35
+#: survey/models/survey.py:46
 msgid "Allow multiple responses from same user"
 msgstr "Разрешить многократное прохождение пользователям"
 
-#: survey/models/survey.py:37
+#: survey/models/survey.py:48
 #, fuzzy
 #| msgid "Display order"
 msgid "Display method"
 msgstr "Порядок отображения"
 
-#: survey/models/survey.py:39
+#: survey/models/survey.py:50
 msgid "Template"
 msgstr "Шаблон"
 
-#: survey/models/survey.py:40
+#: survey/models/survey.py:51
 msgid "Publication date"
 msgstr "Дата публикации"
 
-#: survey/models/survey.py:41
+#: survey/models/survey.py:52
 msgid "Expiration date"
 msgstr "дата удаления"
 
-#: survey/models/survey.py:42
+#: survey/models/survey.py:53
 msgid "Redirect URL"
 msgstr "URL перенаправления"
 
-#: survey/models/survey.py:52
+#: survey/models/survey.py:63
 msgid "survey"
 msgstr "опрос"
 
-#: survey/models/survey.py:53
+#: survey/models/survey.py:64
 msgid "surveys"
 msgstr "опросы"
 
