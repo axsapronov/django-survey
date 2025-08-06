@@ -2,10 +2,31 @@ from django.contrib import admin
 from django.utils.html import mark_safe
 from django.utils.translation import gettext_lazy as _
 
-from survey.actions import make_published
-from survey.exporter.csv import Survey2Csv
-from survey.exporter.tex import Survey2Tex
-from survey.models import Answer, Category, Question, Response, Survey
+
+from survey.models import Answer
+from survey.models import Category
+from survey.models import Question
+from survey.models import Response
+from survey.models import Survey
+
+from django.utils.translation import gettext_lazy as _
+from django.utils.translation import ngettext
+
+
+def make_published(modeladmin, request, queryset):
+    """
+    Mark the given survey as published
+    """
+    count = queryset.update(is_published=True)
+    message = ngettext(
+        "%(count)d survey was successfully marked as published.",
+        "%(count)d surveys were successfully marked as published",
+        count,
+    ) % {"count": count}
+    modeladmin.message_user(request, message)
+
+
+make_published.short_description = _("Mark selected surveys as published")
 
 
 class QuestionInline(admin.StackedInline):
@@ -34,9 +55,11 @@ class CategoryInline(admin.TabularInline):
     extra = 0
 
 
+@admin.register(Survey)
 class SurveyAdmin(admin.ModelAdmin):
     list_display = (
         "name",
+        "id",
         "is_published",
         "page",
         "need_logged_user",
@@ -51,7 +74,7 @@ class SurveyAdmin(admin.ModelAdmin):
     )
     search_fields = ("name", "description")
     inlines = [CategoryInline, QuestionInline]
-    actions = [make_published, Survey2Csv.export_as_csv, Survey2Tex.export_as_tex]
+    actions = [make_published]
 
     @admin.display(description="Page")
     def page(self, obj):
@@ -89,18 +112,19 @@ class AnswerBaseInline(admin.StackedInline):
         return _("Not set")
 
 
+@admin.register(Response)
 class ResponseAdmin(admin.ModelAdmin):
     list_display = (
         "interview_uuid",
         "survey",
-        "created",
         "user",
+        "created",
         "correct_answers_display",
     )
     list_filter = ("survey", "created")
     date_hierarchy = "created"
     inlines = [AnswerBaseInline]
-    # specifies the order as well as which fields to act on
+    search_fields = ("interview_uuid", "user__username")
     readonly_fields = (
         "survey",
         "created",
@@ -118,7 +142,68 @@ class ResponseAdmin(admin.ModelAdmin):
         return f"{obj.correct_answers_count} / {obj.total_answers_count}"
 
 
-# admin.site.register(Question, QuestionInline)
-# admin.site.register(Category, CategoryInline)
-admin.site.register(Survey, SurveyAdmin)
-admin.site.register(Response, ResponseAdmin)
+@admin.register(Question)
+class QuestionAdmin(admin.ModelAdmin):
+    list_display = (
+        "text",
+        "survey",
+        "type",
+        "order",
+        "required",
+        "category",
+    )
+    list_filter = (
+        "type",
+        "required",
+        "category",
+    )
+    search_fields = (
+        "text",
+        "survey__name",
+    )
+    inlines = [AnswerBaseInline]
+
+
+@admin.register(Answer)
+class AnswerAdmin(admin.ModelAdmin):
+    list_display = (
+        "question_text",
+        "response_survey_name",
+        "response_user_username",
+        "body",
+        "created",
+    )
+    list_filter = ("created",)
+    search_fields = (
+        "question__text",
+        "response__interview_uuid",
+    )
+
+    raw_id_fields = (
+        "question",
+        "response",
+    )
+
+    def get_queryset(self, request):
+        return (
+            super()
+            .get_queryset(request)
+            .prefetch_related(
+                "question",
+                "response",
+                "response__user",
+                "response__survey",
+            )
+        )
+
+    @admin.display(description=_("Question"))
+    def question_text(self, obj):
+        return obj.question.text if obj.question else ""
+
+    @admin.display(description=_("Survey"))
+    def response_survey_name(self, obj):
+        return obj.response.survey.name if obj.response and obj.response.survey else ""
+
+    @admin.display(description=_("User"))
+    def response_user_username(self, obj):
+        return obj.response.user.username if obj.response and obj.response.user else ""

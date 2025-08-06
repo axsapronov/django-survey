@@ -25,6 +25,3 @@ def set_default_settings():
                     setattr(settings, setting, getattr(app_settings, setting))
     except ImportError:
         pass
-
-
-set_default_settings()
