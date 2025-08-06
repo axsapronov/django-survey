@@ -4,7 +4,10 @@ from django.core.exceptions import ValidationError
 from django.test import override_settings
 from django.utils.translation import gettext_lazy as _
 
-from survey.models import Answer, Question, Response, Survey
+from survey.models import Answer
+from survey.models import Question
+from survey.models import Response
+from survey.models import Survey
 from survey.tests.models import BaseModelTest
 
 
@@ -117,7 +120,9 @@ class TestQuestion(BaseModelTest):
         self.assertEqual({"1": 1, "2": 1}, question.answers_cardinality())
         question = Question.objects.get(text="Dolor sit amët, consectetur<strong>  adipiscing</strong>  elit.")
         self.assertEqual({"No": 1, "Whatever": 1, "Yës": 1}, question.answers_cardinality())
-        self.assertEqual({"Näh": 2, "Yës": 1}, question.answers_cardinality(group_together={"Näh": ["No", "Whatever"]}))
+        self.assertEqual(
+            {"Näh": 2, "Yës": 1}, question.answers_cardinality(group_together={"Näh": ["No", "Whatever"]})
+        )
 
     def test_answers_cardinality_grouped(self):
         """We can group answers taking letter case or slug into account."""
@@ -130,7 +135,8 @@ class TestQuestion(BaseModelTest):
         self.assertEqual(self.card(group_by_slugify=True), {"abe-ce": 3, "de": 3})
         self.assertEqual(self.card(group_by_slugify=True, group_together={"ABCD": ["abe-ce", "de"]}), {"ABCD": 6})
         self.assertEqual(
-            self.card(group_by_letter_case=True, group_together={"ABCD": ["Abë-cè", "Abé Cé", "Dé", "dë"]}), {"ABCD": 6}
+            self.card(group_by_letter_case=True, group_together={"ABCD": ["Abë-cè", "Abé Cé", "Dé", "dë"]}),
+            {"ABCD": 6},
         )
 
     def test_answers_cardinality_filtered(self):

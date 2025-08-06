@@ -3,7 +3,10 @@ from datetime import date
 from functools import wraps
 
 from django.contrib import messages
-from django.shortcuts import Http404, get_object_or_404, redirect, reverse
+from django.shortcuts import Http404
+from django.shortcuts import get_object_or_404
+from django.shortcuts import redirect
+from django.shortcuts import reverse
 from django.utils.translation import gettext_lazy as _
 
 from survey.models import Survey

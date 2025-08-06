@@ -14,14 +14,12 @@ Including another URLconf
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
 
-from django.conf.urls import include
-
-try:
-    from django.conf.urls import url
-except ImportError:
-    # Django 4.0 replaced url by something else
-    # See https://stackoverflow.com/a/70319607/2519059
-    from django.urls import re_path as url
 from django.contrib import admin
+from django.urls import include
+from django.urls import path
+from django.urls import re_path
 
-urlpatterns = [url(r"^admin/", admin.site.urls), url(r"^survey/", include("survey.urls"))]
+urlpatterns = [
+    re_path(r"^admin/", admin.site.urls),
+    path("survey/", include("survey.urls")),
+]

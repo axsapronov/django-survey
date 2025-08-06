@@ -1,6 +1,4 @@
-
 from django.utils import timezone
-
 from django.views.generic import ListView
 
 from survey.models import Survey

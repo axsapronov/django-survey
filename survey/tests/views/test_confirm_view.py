@@ -1,6 +1,7 @@
 from django.urls.base import reverse
 
-from survey.models import Response, Survey
+from survey.models import Response
+from survey.models import Survey
 from survey.tests.base_test import BaseTest
 
 

@@ -3,7 +3,7 @@
 
 {% block body %}
 <div id="intro">
-	<h1>{% trans "Welcome to the Django Survey app"%}</h1>
+    <h1>{% trans "Welcome to the Django Survey app"%}</h1>
     {% if messages %}
         <p>
             {% for message in messages %}
@@ -14,10 +14,10 @@
         </p>
     {% endif %}
 
-	<ul>
-		{% for object in object_list %}
-		<li><a href="{{ object.get_absolute_url }}">{% trans "Take the Survey"%} {{object.name}}</a></li>
-		{% endfor %}
-	</div>
+    <ul>
+        {% for object in object_list %}
+        <li><a href="{{ object.get_absolute_url }}">{% trans "Take the Survey"%} {{object.name}}</a></li>
+        {% endfor %}
+    </div>
 </div>
 {% endblock %}

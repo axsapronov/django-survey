@@ -1,4 +1,7 @@
-from survey.models import Answer, Question, Response, Survey
+from survey.models import Answer
+from survey.models import Question
+from survey.models import Response
+from survey.models import Survey
 from survey.tests import BaseTest
 
 

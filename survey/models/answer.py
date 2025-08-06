@@ -19,11 +19,36 @@ LOGGER = logging.getLogger(__name__)
 
 
 class Answer(models.Model):
-    question = models.ForeignKey(Question, on_delete=models.CASCADE, verbose_name=_("Question"), related_name="answers")
-    response = models.ForeignKey(Response, on_delete=models.CASCADE, verbose_name=_("Response"), related_name="answers")
-    created = models.DateTimeField(_("Creation date"), auto_now_add=True)
-    updated = models.DateTimeField(_("Update date"), auto_now=True)
-    body = models.TextField(_("Content"), blank=True, null=True)
+    question = models.ForeignKey(
+        Question,
+        on_delete=models.CASCADE,
+        verbose_name=_("Question"),
+        related_name="answers",
+    )
+    response = models.ForeignKey(
+        Response,
+        on_delete=models.CASCADE,
+        verbose_name=_("Response"),
+        related_name="answers",
+    )
+    created = models.DateTimeField(
+        _("Creation date"),
+        auto_now_add=True,
+    )
+    updated = models.DateTimeField(
+        _("Update date"),
+        auto_now=True,
+    )
+    body = models.TextField(
+        _("Content"),
+        blank=True,
+        null=True,
+    )
+
+    class Meta:
+        ordering = ("created",)
+        verbose_name = _("Answer")
+        verbose_name_plural = _("Answers")
 
     def __init__(self, *args, **kwargs):
         try:
@@ -41,14 +66,21 @@ class Answer(models.Model):
             return [None]
         if not self.body.startswith("[") or not self.body.endswith("]"):
             return [self.body]
-        return [x.replace("'", "") for x in self.body[1:-1].split(settings.CHOICES_SEPARATOR)]
+        # Убираем префикс 'u' из Unicode строк и лишние пробелы
+        values = []
+        for x in self.body[1:-1].split(settings.CHOICES_SEPARATOR):
+            # Убираем кавычки и префикс 'u'
+            cleaned = x.replace("'", "").replace('"', "").strip()
+            if cleaned.startswith("u"):
+                cleaned = cleaned[1:]
+            values.append(cleaned)
+        return values
 
     @property
     def display_value(self):
         if self.question.type in [Question.RADIO, Question.SELECT, Question.SELECT_MULTIPLE]:
             return ", ".join(self.values)
         return self.body
-
 
     def _validate_value(self, value, question_type, choices=None):
         """
@@ -165,8 +197,8 @@ class Answer(models.Model):
 
             # Для вопросов с множественным выбором
             if self.question.type == Question.SELECT_MULTIPLE:
-                user_answers = set(slugify(val.lower(), allow_unicode=True) for val in answer_values)
-                correct_answers_set = set(slugify(ans.lower(), allow_unicode=True) for ans in correct_answers)
+                user_answers = {slugify(val.lower(), allow_unicode=True) for val in answer_values}
+                correct_answers_set = {slugify(ans.lower(), allow_unicode=True) for ans in correct_answers}
                 return user_answers == correct_answers_set
 
             # Для даты

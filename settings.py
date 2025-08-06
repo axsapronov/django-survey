@@ -8,20 +8,12 @@ except ImportError:
 
 colorama.init()
 
-print(
-    "\033[33m"
-    "You're using a dev settings file. It includes django rosetta (in order "
-    " for dev to update translations) that is only useful for dev. "
-    "If you're a developper you need to 'pip3 install -e \".[dev]\"', "
-    "If you want to use the app without doing your own settings you should"
-    " remove django-rosetta from the installed apps in the settings."
-    "\033[39m"
-)
-
 DEBUG = True
 ROOT = os.path.dirname(os.path.abspath(__file__))
 CSV_DIRECTORY = os.path.join(ROOT, "csv")
 TEX_DIRECTORY = os.path.join(ROOT, "tex")
+
+ALLOWED_HOSTS = ["*"]
 
 logging.basicConfig(level=logging.DEBUG, format="%(name)s.%(funcName)s() l.%(lineno)s -\033[32m %(message)s \033[39m")
 
@@ -48,7 +40,6 @@ CHOICES_SEPARATOR = ","
 SITE_ID = 1
 TIME_ZONE = "UTC"
 USE_I18N = True
-USE_L10N = True
 USE_TZ = True
 
 DEFAULT_SURVEY_PUBLISHING_DURATION = 7  # in days
@@ -66,6 +57,8 @@ STATICFILES_FINDERS = (
 
 DEBUG_ADMIN_NAME = "test_admin"
 DEBUG_ADMIN_PASSWORD = "test_password"
+
+LOGIN_URL = "/admin/login/"
 
 STATICFILES_DIRS = [os.path.normpath(os.path.join(ROOT, "survey", "static"))]
 
@@ -117,7 +110,6 @@ INSTALLED_APPS = (
     "django.contrib.staticfiles",
     "django.contrib.sites",
     "survey",
-    "rosetta",
 )
 
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
@@ -127,17 +119,6 @@ LANGUAGE_CODE = "en-us"
 LANGUAGES = (
     ("en", "english"),
     ("ru", "russian"),
-    ("es", "spanish"),
-    ("fr", "french"),
-    ("ja", "Japanese"),
-    ("nl", "Dutch"),
-    ("zh", "Chinese"),
-    ("de", "German"),
-    ("id", "Indonesian"),
-    ("pt", "Portuguese"),
-    ("pl", "Polish"),
-    ("tr", "Turkish"),
-    ("gr", "Greek"),
 )
 
 LOGIN_REDIRECT_URL = "/"

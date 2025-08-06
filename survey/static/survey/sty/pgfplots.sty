@@ -24,12 +24,12 @@
 %
 %--------------------------------------------
 \IfFileExists{pgfplots.revision.tex}{\input pgfplots.revision.tex } {%
-	\def\pgfplotsrevision{0}%
-	\def\pgfplotsversion{0.0}%
+    \def\pgfplotsrevision{0}%
+    \def\pgfplotsversion{0.0}%
     \def\pgfplotsversiondatetime{2014-07-01 00:00:00 +100}%
     \def\pgfplotsrevisiondatetime{2014-07-01 00:00:00 +100}%
-	\def\pgfplotsversiondate{2014/07/01}%
-	\def\pgfplotsrevisiondate{2014/07/01}%
+    \def\pgfplotsversiondate{2014/07/01}%
+    \def\pgfplotsrevisiondate{2014/07/01}%
 }
 \ProvidesPackage{pgfplots}[\pgfplotsversiondate\space v\pgfplotsversion\space Data Visualization (\pgfplotsrevision)]
 
@@ -49,26 +49,26 @@
 % -> dvipdfm needs special attention.
 
 \IfFileExists{pgfsys-luatex.def}{%
-	% OK, proceed as usual
+    % OK, proceed as usual
 }{%
-	% hm. check if we need it:
-	\def\pgfplots@glob@TMPa{luatex.def}%
-	\edef\pgfplots@glob@TMPb{\Gin@driver}%
-	\ifx\pgfplots@glob@TMPb\pgfplots@glob@TMPa
-		% hm. probably
-		\@ifundefined{pgfsysdriver}{%
-			% use a patch shipped with pgfplots:
-			\def\pgfsysdriver{pgfsys-luatexpatch.def}%
-			\immediate\write16{Package pgfplots external lib: activating patch for pgfsys-luatex.def driver (PGF is too old)}
-		}{%
-			\def\pgfplots@glob@TMPa{pgfsys-luatex.def}%
-			\ifx\pgfsysdriver\pgfplots@glob@TMPa
-				% use a patch shipped with pgfplots:
-				\def\pgfsysdriver{pgfsys-luatexpatch.def}%
-				\immediate\write16{Package pgfplots external lib: activating patch for pgfsys-luatex.def driver (PGF is too old)}
-			\fi
-		}%
-	\fi
+    % hm. check if we need it:
+    \def\pgfplots@glob@TMPa{luatex.def}%
+    \edef\pgfplots@glob@TMPb{\Gin@driver}%
+    \ifx\pgfplots@glob@TMPb\pgfplots@glob@TMPa
+        % hm. probably
+        \@ifundefined{pgfsysdriver}{%
+            % use a patch shipped with pgfplots:
+            \def\pgfsysdriver{pgfsys-luatexpatch.def}%
+            \immediate\write16{Package pgfplots external lib: activating patch for pgfsys-luatex.def driver (PGF is too old)}
+        }{%
+            \def\pgfplots@glob@TMPa{pgfsys-luatex.def}%
+            \ifx\pgfsysdriver\pgfplots@glob@TMPa
+                % use a patch shipped with pgfplots:
+                \def\pgfsysdriver{pgfsys-luatexpatch.def}%
+                \immediate\write16{Package pgfplots external lib: activating patch for pgfsys-luatex.def driver (PGF is too old)}
+            \fi
+        }%
+    \fi
 }
 
 \RequirePackage{tikz}
@@ -84,8 +84,8 @@
   \fi
 }
 \pgfplotsutil@IfUndefined{directlua}{}{%
-	% I need \newcatcodetable
-	\RequirePackage{luatexbase}%
+    % I need \newcatcodetable
+    \RequirePackage{luatexbase}%
 }%
 
 \def\pgfplots@texdist@protect{\protect}%
@@ -96,40 +96,40 @@
 % checks for xcolor configuration options and will override
 %   mesh/colorspace explicit color output
 % and
-%	colormap default colorspace
+%   colormap default colorspace
 % if needed.
 \def\pgfplots@check@global@colorspace@overrides{%
-	% "bOverridesColorspace"
-	\pgfplots@loc@tmpfalse
-	\ifconvertcolorsD
-		% xcolor converts at *definition* time:
-		\pgfplots@loc@tmptrue
-	\else
-		\ifconvertcolorsU
-			% xcolor converts at *usage* time:
-			\pgfplots@loc@tmptrue
-		\fi
-	\fi
-	%
-	\ifpgfplots@loc@tmp
-		\let\pgfplots@loc@TMPb=\pgfutil@empty%
-		\ifx\XC@tgt@mod\pgfplots@XC@tgt@mod@rgb \def\pgfplots@loc@TMPb{rgb}\fi
-		\ifx\XC@tgt@mod\pgfplots@XC@tgt@mod@RGB \def\pgfplots@loc@TMPb{rgb}\fi
-		\ifx\XC@tgt@mod\pgfplots@XC@tgt@mod@cmyk\def\pgfplots@loc@TMPb{cmyk}\fi
-		\ifx\XC@tgt@mod\pgfplots@XC@tgt@mod@cmy \def\pgfplots@loc@TMPb{cmyk}\fi
-		\ifx\XC@tgt@mod\pgfplots@XC@tgt@mod@gray \def\pgfplots@loc@TMPb{gray}\fi
-		\ifx\XC@tgt@mod\pgfplots@XC@tgt@mod@Gray \def\pgfplots@loc@TMPb{gray}\fi
-		%
-		\ifx\pgfplots@loc@TMPb\pgfutil@empty
-		\else
-			\edef\pgfplots@loc@TMPa{%
-				mesh/colorspace explicit color output=\pgfplots@loc@TMPb,%
-				colormap default colorspace=\pgfplots@loc@TMPb,%
-			}%
-			\pgfplots@log3{Overriding colorspace to \pgfplots@loc@TMPb\space due to xcolor configuration.}%
-			\expandafter\pgfplotsset\expandafter{\pgfplots@loc@TMPa}%
-		\fi
-	\fi
+    % "bOverridesColorspace"
+    \pgfplots@loc@tmpfalse
+    \ifconvertcolorsD
+        % xcolor converts at *definition* time:
+        \pgfplots@loc@tmptrue
+    \else
+        \ifconvertcolorsU
+            % xcolor converts at *usage* time:
+            \pgfplots@loc@tmptrue
+        \fi
+    \fi
+    %
+    \ifpgfplots@loc@tmp
+        \let\pgfplots@loc@TMPb=\pgfutil@empty%
+        \ifx\XC@tgt@mod\pgfplots@XC@tgt@mod@rgb \def\pgfplots@loc@TMPb{rgb}\fi
+        \ifx\XC@tgt@mod\pgfplots@XC@tgt@mod@RGB \def\pgfplots@loc@TMPb{rgb}\fi
+        \ifx\XC@tgt@mod\pgfplots@XC@tgt@mod@cmyk\def\pgfplots@loc@TMPb{cmyk}\fi
+        \ifx\XC@tgt@mod\pgfplots@XC@tgt@mod@cmy \def\pgfplots@loc@TMPb{cmyk}\fi
+        \ifx\XC@tgt@mod\pgfplots@XC@tgt@mod@gray \def\pgfplots@loc@TMPb{gray}\fi
+        \ifx\XC@tgt@mod\pgfplots@XC@tgt@mod@Gray \def\pgfplots@loc@TMPb{gray}\fi
+        %
+        \ifx\pgfplots@loc@TMPb\pgfutil@empty
+        \else
+            \edef\pgfplots@loc@TMPa{%
+                mesh/colorspace explicit color output=\pgfplots@loc@TMPb,%
+                colormap default colorspace=\pgfplots@loc@TMPb,%
+            }%
+            \pgfplots@log3{Overriding colorspace to \pgfplots@loc@TMPb\space due to xcolor configuration.}%
+            \expandafter\pgfplotsset\expandafter{\pgfplots@loc@TMPa}%
+        \fi
+    \fi
 }%
 
 \def\pgfplots@XC@tgt@mod@rgb#1{rgb}

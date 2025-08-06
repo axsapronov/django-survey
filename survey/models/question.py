@@ -20,8 +20,8 @@ options for this question ."""
 )
 
 CORRECT_ANSWER_HELP_TEXT = _(
-    """Optional. Set the correct answer for this question. 
-For multiple choice questions, use comma-separated values. 
+    """Optional. Set the correct answer for this question.
+For multiple choice questions, use comma-separated values.
 For text questions, provide the exact expected answer."""
 )
 
@@ -73,7 +73,12 @@ class Question(models.Model):
     order = models.IntegerField(_("Order"))
     required = models.BooleanField(_("Required"))
     category = models.ForeignKey(
-        Category, on_delete=models.SET_NULL, verbose_name=_("Category"), blank=True, null=True, related_name="questions"
+        Category,
+        on_delete=models.SET_NULL,
+        verbose_name=_("Category"),
+        blank=True,
+        null=True,
+        related_name="questions",
     )
     survey = models.ForeignKey(Survey, on_delete=models.CASCADE, verbose_name=_("Survey"), related_name="questions")
     type = models.CharField(_("Type"), max_length=200, choices=QUESTION_TYPES, default=TEXT)

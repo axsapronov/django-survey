@@ -2,7 +2,10 @@ import logging
 
 from django.conf import settings
 from django.http import Http404
-from django.shortcuts import get_object_or_404, redirect, render, reverse
+from django.shortcuts import get_object_or_404
+from django.shortcuts import redirect
+from django.shortcuts import render
+from django.shortcuts import reverse
 from django.views.generic import View
 
 from survey.forms import ResponseForm

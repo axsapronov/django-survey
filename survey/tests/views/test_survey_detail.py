@@ -3,7 +3,9 @@ import logging
 from django.conf import settings
 from django.urls.base import reverse
 
-from survey.models import Answer, Response, Survey
+from survey.models import Answer
+from survey.models import Response
+from survey.models import Survey
 from survey.tests import BaseTest
 
 LOGGER = logging.getLogger(__name__)

@@ -3,10 +3,6 @@ from pathlib import Path
 
 from django.conf import settings
 
-# Number of messages to display per page.
-MESSAGES_PER_PAGE = getattr(settings, "ROSETTA_MESSAGES_PER_PAGE", 10)
-
-
 ROOT = os.path.dirname(os.path.abspath(__file__))
 USER_DID_NOT_ANSWER = getattr(settings, "USER_DID_NOT_ANSWER", "Left blank")
 TEX_CONFIGURATION_FILE = getattr(settings, "TEX_CONFIGURATION_FILE", Path(ROOT, "doc", "example_conf.yaml"))
@@ -56,13 +52,4 @@ LANGUAGE_CODE = "en"
 LANGUAGES = (
     ("en", "english"),
     ("ru", "russian"),
-    ("es", "spanish"),
-    ("fr", "french"),
-    ("ja", "Japanese"),
-    ("nl", "Dutch"),
-    ("zh", "Chinese"),
-    ("de", "German"),
-    ("id", "Indonesian"),
-    ("pt", "Portuguese"),
-    ("pl", "Polish"),
 )

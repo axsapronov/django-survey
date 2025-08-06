@@ -1,11 +1,13 @@
 import logging
 
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import get_object_or_404
+from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
 from django.views.generic import ListView
 
-from survey.models import Response, Survey
+from survey.models import Response
+from survey.models import Survey
 
 LOGGER = logging.getLogger(__name__)
 
