@@ -29,6 +29,7 @@ i18n: i18n-collect
 	git add survey/locale
 
 release:
+	poetry run bump-my-version bump patch
 	poetry build
 	poetry run twine upload --verbose dist/*
 
