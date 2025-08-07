@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "django-survey-axsapronov"
-version = "2.0.1"
+version = "2.0.2"
 description = "Мощное Django приложение для создания и управления опросами, анкетами и тестами с поддержкой различных типов вопросов, категорий и аналитики"
 authors = [
   "Pierre SASSOULAS <pierre.sassoulas@gmail.com>",
@@ -318,7 +318,7 @@ indent_size = 2
 
 
 [tool.bumpversion]
-current_version = "2.0.1"
+current_version = "2.0.2"
 commit = true
 commit_args = "--no-verify"
 tag = false
