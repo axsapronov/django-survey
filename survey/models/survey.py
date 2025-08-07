@@ -11,7 +11,7 @@ from meta.models import ModelMeta
 
 
 def in_duration_day():
-    return now() + timedelta(days=settings.DEFAULT_SURVEY_PUBLISHING_DURATION)
+    return now() + timedelta(days=getattr(settings, "DEFAULT_SURVEY_PUBLISHING_DURATION", 7))
 
 
 def get_default_survey_slug():
