@@ -34,10 +34,13 @@ class Response(models.Model):
         ordering = ["-created"]
 
     def get_absolute_url(self):
-        if self.survey.multiple_responses:
-            return reverse("survey:response-detail", kwargs={"response_id": self.pk, "survey_id": self.survey_id})
-        else:
-            return reverse("survey:survey-detail", kwargs={"survey_id": self.survey_id})
+        return reverse(
+            "survey:response-detail",
+            kwargs={
+                "response_id": self.pk,
+                "survey_id": self.survey_id,
+            },
+        )
 
     @property
     def correct_answers_count(self) -> int:

@@ -86,6 +86,16 @@ class Question(models.Model):
     choices = models.TextField(_("Choices"), blank=True, null=True, help_text=CHOICES_HELP_TEXT)
     correct_answer = models.TextField(_("Correct Answer"), blank=True, null=True, help_text=CORRECT_ANSWER_HELP_TEXT)
 
+    hint = models.TextField(_("Hint"), blank=True, null=True, help_text=_("Hint for the question"))
+    explanation = models.TextField(_("Explanation"), blank=True, null=True, help_text=_("Explanation for the answer"))
+
+    properties = models.JSONField(
+        default=dict,
+        blank=True,
+        verbose_name=_("Properties"),
+        help_text=_("Additional information"),
+    )
+
     class Meta:
         verbose_name = _("Question")
         verbose_name_plural = _("Questions")

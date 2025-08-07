@@ -14,11 +14,6 @@ CHOICES_SEPARATOR = getattr(settings, "CHOICES_SEPARATOR", ",")
 EXCEL_COMPATIBLE_CSV = False
 DEFAULT_SURVEY_PUBLISHING_DURATION = 7
 
-MEDIA_URL = "/media/"
-STATIC_URL = "/static/"
-
-MEDIA_ROOT = Path(ROOT, "media")
-STATIC_ROOT = Path(ROOT, "static")
 
 DEBUG_ADMIN_NAME = "test_admin"
 DEBUG_ADMIN_PASSWORD = "test_password"
@@ -35,16 +30,21 @@ DATABASES = {
     }
 }
 
-STATICFILES_DIRS = [os.path.normpath(Path(ROOT, "..", "survey", "static"))]
+MEDIA_URL = "/media/"
+STATIC_URL = "/static/"
+
+MEDIA_ROOT = Path(ROOT, "media")
+STATIC_ROOT = Path(ROOT, "static")
+
+STATICFILES_DIRS = []
 
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [Path(ROOT, "survey", "templates"), Path(ROOT, "dev", "templates")],
+        "DIRS": [Path(ROOT, "survey", "templates")],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
-                # Default
                 "django.contrib.auth.context_processors.auth",
                 "django.template.context_processors.debug",
                 "django.template.context_processors.i18n",
@@ -82,6 +82,7 @@ INSTALLED_APPS = (
     "django.contrib.sites",
     "django_pluralize_ru",
     "crispy_forms",
+    "crispy_bootstrap5",
     "survey",
 )
 
@@ -92,9 +93,13 @@ TIME_ZONE = "UTC"
 USE_I18N = True
 USE_TZ = True
 
-LOCALE_PATHS = (Path(ROOT, "survey", "locale"),)
+LOCALE_PATHS = (Path(ROOT, "locale"),)
 LANGUAGE_CODE = "en"
 LANGUAGES = (
     ("en", "english"),
     ("ru", "russian"),
 )
+
+# Crispy Forms настройки
+CRISPY_TEMPLATE_PACK = "bootstrap5"
+CRISPY_ALLOWED_TEMPLATE_PACKS = ("bootstrap5",)

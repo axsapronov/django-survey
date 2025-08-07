@@ -29,20 +29,26 @@ class Survey(ModelMeta, models.Model):
         (ALL_IN_ONE_PAGE, _("All in one page")),
     ]
 
-    # slug = models.SlugField(
-    #     default=get_default_survey_slug,
-    #     unique=True,
-    #     verbose_name=_("Slug"),
-    #     help_text=_("Technical name for seo"),
-    # )
-    # order = models.SmallIntegerField(
-    #     verbose_name=_("Order"),
-    #     default=100,
-    # )
+    order = models.PositiveIntegerField(
+        verbose_name=_("Order"),
+        default=100,
+    )
     name = models.CharField(_("Name"), max_length=400)
-    description = models.TextField(_("Description"))
 
-    # TODO - short_description
+    short_description = models.TextField(
+        verbose_name=_("Short description"),
+        max_length=255,
+        blank=True,
+        default="",
+    )
+
+    description = models.TextField(
+        verbose_name=_("Description"),
+        blank=True,
+        default="",
+    )
+
+    # TODO - add
     # category = models.ForeignKey(
     #     "Category",
     #     on_delete=models.SET_NULL,
@@ -50,6 +56,8 @@ class Survey(ModelMeta, models.Model):
     #     blank=True,
     #     verbose_name=_("Category"),
     # )
+
+    # TODO - добавить скорринг логику
 
     is_published = models.BooleanField(_("Users can see it and answer it"), default=True)
     need_logged_user = models.BooleanField(_("Only authenticated users can see it and answer it"))
@@ -63,9 +71,19 @@ class Survey(ModelMeta, models.Model):
     expire_date = models.DateField(_("Expiration date"), blank=True, null=False, default=in_duration_day)
     redirect_url = models.URLField(_("Redirect URL"), blank=True)
 
+    gift_before = models.TextField(_("Gift before survey"), blank=True, null=True)
+    gift_after = models.TextField(_("Gift after survey"), blank=True, null=True)
+
+    properties = models.JSONField(
+        default=dict,
+        blank=True,
+        verbose_name=_("Properties"),
+        help_text=_("Additional information"),
+    )
+
     _metadata = {
         "title": "name",
-        "description": "description",
+        "description": "short_description",
         "published_time": "publish_date",
         "modified_time": "publish_date",
     }
