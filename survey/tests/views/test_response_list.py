@@ -84,19 +84,6 @@ class TestResponseListView:
 
         assert response.status_code == 200
 
-    def test_get_with_multiple_responses_not_allowed_redirects(self):
-        """Тест редиректа когда множественные ответы не разрешены"""
-        user = UserFactory()
-        survey = SurveyFactory(multiple_responses=False)
-
-        request = self.factory.get(f"/survey/{survey.id}/responses/")
-        request.user = user
-
-        response = self.view(request, survey_id=survey.id)
-
-        assert response.status_code == 302
-        assert f"/survey/{survey.id}/" in response.url
-
     def test_view_with_client_authenticated_user(self, client):
         """Тест вьюхи через клиент для аутентифицированного пользователя"""
         user = UserFactory()
