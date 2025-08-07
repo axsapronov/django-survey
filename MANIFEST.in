@@ -1,1 +1,2 @@
 recursive-include survey *html *png *gif *js *jpg *jpeg *svg *py *po
+recursive-include survey/migrations *.py

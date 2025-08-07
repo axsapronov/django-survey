@@ -33,6 +33,12 @@ ALLOWED_HOSTS = []
 # EXCEL_COMPATIBLE_CSV = True
 TEX_DIRECTORY = "tex"
 
+# Survey settings
+DEFAULT_SURVEY_PUBLISHING_DURATION = 7
+
+# Default primary key field type
+DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
+
 
 # Application definition
 

@@ -34,3 +34,10 @@ release:
 
 check:
 	poetry run pre-commit run --show-diff-on-failure --color=always --all-files
+
+
+migrations:
+	poetry run python manage.py makemigrations
+
+migrate:
+	poetry run python manage.py migrate
