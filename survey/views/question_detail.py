@@ -43,7 +43,29 @@ class QuestionDetailView(FormView):
         return True
 
     def get_form_class(self):
-        return lambda *args, **kwargs: QuestionAnswerForm(self.current_question, *args, **kwargs)
+        # Получаем или создаем Response для передачи в форму
+        response, _ = self._get_or_create_response()
+
+        return lambda *args, **kwargs: QuestionAnswerForm(
+            self.current_question,
+            response=response,
+            survey=self.survey,
+            current_question_index=self.current_question_index + 1,
+            read_only=self.request.method == "POST",
+            *args,
+            **kwargs,
+        )
+
+    def get_form_kwargs(self):
+        """Передает дополнительные параметры в форму"""
+        kwargs = super().get_form_kwargs()
+
+        # Передаем параметры для отображения правильного ответа
+        if self.request.method == "POST" and self.current_question.correct_answer:
+            kwargs["show_correct_answer"] = True
+            kwargs["correct_answer"] = self.current_question.display_correct_answer
+
+        return kwargs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -54,10 +76,8 @@ class QuestionDetailView(FormView):
         context["progress_percentage"] = int((self.current_question_index) / self.survey.total_questions * 100) or 3
 
         # Показываем правильный ответ только после POST запроса
-        context["show_correct_answer"] = True
-
         if self.request.method == "POST" and self.current_question.correct_answer:
-            context["correct_answer"] = self.current_question.correct_answer
+            context["correct_answer"] = self.current_question.display_correct_answer
             context["show_correct_answer"] = True
 
         return context
@@ -68,9 +88,11 @@ class QuestionDetailView(FormView):
 
         # Если есть правильный ответ, показываем его и остаемся на этой странице
         if self.current_question.correct_answer:
+            self.show_correct_answer = True
+            self.correct_answer = self.current_question.display_correct_answer
             context = self.get_context_data()
             context["show_correct_answer"] = True
-            context["correct_answer"] = self.current_question.correct_answer
+            context["correct_answer"] = self.correct_answer
             return self.render_to_response(context)
 
         # Иначе переходим к следующему вопросу

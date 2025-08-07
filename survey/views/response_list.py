@@ -2,7 +2,6 @@ import logging
 
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404
-from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
 from django.views.generic import ListView
 
@@ -29,9 +28,3 @@ class ResponseListView(ListView):
         context = super().get_context_data(**kwargs)
         context["survey"] = self.survey
         return context
-
-    def get(self, request, *args, **kwargs):
-        response = super().get(request, *args, **kwargs)
-        if not self.survey.multiple_responses:
-            return redirect(self.survey.get_absolute_url())
-        return response

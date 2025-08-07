@@ -1,215 +1,80 @@
 import logging
-import uuid
 
+from crispy_forms.helper import FormHelper
+from crispy_forms.layout import HTML
+from crispy_forms.layout import Button
+from crispy_forms.layout import Div
+from crispy_forms.layout import Field
+from crispy_forms.layout import Layout
+from crispy_forms.layout import Submit
 from django import forms
-from django.conf import settings
-from django.utils.text import slugify
+from django.urls import reverse
+from django.utils.translation import gettext_lazy as _
 
 from survey.models import Answer
 from survey.models import Question
 from survey.models import Response
-from survey.widgets import ImageSelectWidget
 
 LOGGER = logging.getLogger(__name__)
 
 
-class QuestionForm(forms.Form):
-    """
-    Форма для обработки одного вопроса.
-    Сохраняет ответ сразу после валидации.
-    """
+def mark_option(option, value, correct_answers, user_answers):
+    """Помечает опцию CSS классами в зависимости от правильности ответа"""
+    if "attrs" not in option:
+        option["attrs"] = {}
 
-    FIELDS = {
-        Question.TEXT: forms.CharField,
-        Question.SHORT_TEXT: forms.CharField,
-        Question.SELECT_MULTIPLE: forms.MultipleChoiceField,
-        Question.INTEGER: forms.IntegerField,
-        Question.FLOAT: forms.FloatField,
-        Question.DATE: forms.DateField,
-    }
+    if "class" not in option["attrs"]:
+        option["attrs"]["class"] = ""
 
-    WIDGETS = {
-        Question.TEXT: forms.Textarea,
-        Question.SHORT_TEXT: forms.TextInput,
-        Question.RADIO: forms.RadioSelect,
-        Question.SELECT: forms.Select,
-        Question.SELECT_IMAGE: ImageSelectWidget,
-        Question.SELECT_MULTIPLE: forms.CheckboxSelectMultiple,
-    }
+    if value in correct_answers:
+        option["attrs"]["answer-valid"] = "true"
 
-    def __init__(self, question, response, *args, **kwargs):
-        """
-        Инициализация формы для одного вопроса.
+    if value in user_answers and value not in correct_answers:
+        option["attrs"]["answer-invalid"] = "true"
 
-        Args:
-            question: Объект Question
-            response: Объект Response (может быть None для нового ответа)
-            *args, **kwargs: Стандартные аргументы формы
-        """
-        self.question = question
-        self.response = response
+    return option
+
+
+class ValidatedRadioSelect(forms.RadioSelect):
+    use_fieldset = False
+
+    def __init__(self, correct_answers=None, user_answers=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.correct_answers = correct_answers or []
+        self.user_answers = user_answers or []
 
-        # Добавляем поле для вопроса
-        self.add_question_field()
+    def create_option(self, name, value, label, selected, index, subindex=None, attrs=None):
+        option = super().create_option(name, value, label, selected, index, subindex, attrs)
+        option = mark_option(option, value, self.correct_answers, self.user_answers)
+        return option
 
-        # Если есть существующий ответ, заполняем начальными данными
-        if self.response:
-            self.set_initial_data()
 
-    def add_question_field(self):
-        """Добавляет поле для текущего вопроса"""
-        kwargs = {"label": self.question.text, "required": self.question.required}
+class ValidatedCheckboxSelectMultiple(forms.CheckboxSelectMultiple):
+    use_fieldset = False
 
-        # Добавляем choices для вопросов с выбором
-        if self.question.type in [Question.RADIO, Question.SELECT, Question.SELECT_MULTIPLE, Question.SELECT_IMAGE]:
-            choices = self.question.get_choices()
-            if self.question.type in [Question.SELECT, Question.SELECT_IMAGE]:
-                choices = tuple([("", "-------------")]) + choices
-            kwargs["choices"] = choices
+    def __init__(self, correct_answers=None, user_answers=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.correct_answers = correct_answers or []
+        self.user_answers = user_answers or []
 
-        # Добавляем widget
-        if self.question.type in self.WIDGETS:
-            kwargs["widget"] = self.WIDGETS[self.question.type]()
+    def create_option(self, name, value, label, selected, index, subindex=None, attrs=None):
+        option = super().create_option(name, value, label, selected, index, subindex, attrs)
+        option = mark_option(option, value, self.correct_answers, self.user_answers)
+        return option
 
-        # Создаем поле
-        if self.question.type in self.FIELDS:
-            field = self.FIELDS[self.question.type](**kwargs)
-        else:
-            field = forms.ChoiceField(**kwargs)
 
-        # Добавляем CSS класс для даты
-        if self.question.type == Question.DATE:
-            field.widget.attrs["class"] = "date"
+class ValidatedSelect(forms.Select):
+    use_fieldset = False
 
-        # Добавляем атрибут категории
-        field.widget.attrs["category"] = self.question.category.name if self.question.category else ""
+    def __init__(self, correct_answers=None, user_answers=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.correct_answers = correct_answers or []
+        self.user_answers = user_answers or []
 
-        # Используем имя поля в формате question_<id> для совместимости со старыми тестами
-        self.fields[f"question_{self.question.pk}"] = field
-
-    def set_initial_data(self):
-        """Устанавливает начальные данные из существующего ответа"""
-        try:
-            existing_answer = Answer.objects.get(response=self.response, question=self.question)
-
-            field_name = f"question_{self.question.pk}"
-
-            if self.question.type == Question.SELECT_MULTIPLE:
-                # Для множественного выбора нужно преобразовать строку в список
-                if (
-                    existing_answer.body
-                    and existing_answer.body.startswith("[")
-                    and existing_answer.body.endswith("]")
-                ):
-                    # Извлекаем значения из строки вида "['value1', 'value2']"
-                    values_str = existing_answer.body[1:-1]
-                    if values_str:
-                        values = []
-                        for part in values_str.split(settings.CHOICES_SEPARATOR):
-                            # Извлекаем значение между кавычками
-                            if "'" in part:
-                                value = part.split("'")[1]
-                                values.append(slugify(value))
-                        self.fields[field_name].initial = values
-                else:
-                    # Одно значение
-                    if existing_answer.body:
-                        self.fields[field_name].initial = [slugify(existing_answer.body)]
-            else:
-                # Для остальных типов вопросов
-                if self.question.type in [Question.RADIO, Question.SELECT, Question.SELECT_IMAGE]:
-                    # Для вопросов с выбором нужно найти slug
-                    if existing_answer.body:
-                        choices = dict(self.question.get_choices())
-                        # Ищем ключ по значению
-                        for key, value in choices.items():
-                            if value == existing_answer.body:
-                                self.fields[field_name].initial = key
-                                break
-                else:
-                    # Для текстовых и числовых вопросов
-                    self.fields[field_name].initial = existing_answer.body
-
-        except Answer.DoesNotExist:
-            pass
-
-    def save(self, commit=True):
-        """
-        Сохраняет ответ в базу данных.
-
-        Returns:
-            Answer: Сохраненный объект ответа
-        """
-        if not self.is_valid():
-            raise ValueError("Form is not valid")
-
-        # Получаем или создаем Response
-        if self.response is None:
-            # Создаем новый Response
-            user = None
-            if hasattr(self, "user") and self.user.is_authenticated:
-                user = self.user
-            self.response = Response.objects.create(
-                survey=self.question.survey,
-                user=user,
-                interview_uuid=uuid.uuid4().hex,
-            )
-
-        # Получаем значение ответа из поля question_<id>
-        field_name = f"question_{self.question.pk}"
-        answer_value = self.cleaned_data[field_name]
-
-        # Преобразуем значение в зависимости от типа вопроса
-        if self.question.type in [Question.RADIO, Question.SELECT, Question.SELECT_MULTIPLE, Question.SELECT_IMAGE]:
-            choices = dict(self.question.get_choices())
-            if self.question.type == Question.SELECT_MULTIPLE:
-                # Для множественного выбора
-                selected_values = []
-                for val in answer_value:
-                    if val in choices:
-                        selected_values.append(choices[val])
-                body_value = str(selected_values)
-            else:
-                # Для одиночного выбора
-                body_value = choices.get(answer_value, str(answer_value))
-        else:
-            body_value = str(answer_value)
-
-        # Получаем или создаем Answer
-        answer, created = Answer.objects.get_or_create(
-            response=self.response, question=self.question, defaults={"body": body_value}
-        )
-
-        if not created:
-            # Обновляем существующий ответ
-            answer.body = body_value
-            answer.save()
-
-        return answer
-
-    def get_previous_answer_info(self):
-        """
-        Получает информацию о предыдущем ответе для отображения его правильности.
-
-        Returns:
-            dict: Информация о предыдущем ответе или None
-        """
-        if not self.response:
-            return None
-
-        try:
-            previous_answer = Answer.objects.get(response=self.response, question=self.question)
-
-            return {
-                "question_text": self.question.text,
-                "user_answer": previous_answer.display_value,
-                "is_correct": previous_answer.is_correct,
-                "correct_answer": self.question.display_correct_answer,
-                "question_type": self.question.type,
-            }
-        except Answer.DoesNotExist:
-            return None
+    def create_option(self, name, value, label, selected, index, subindex=None, attrs=None):
+        option = super().create_option(name, value, label, selected, index, subindex, attrs)
+        option = mark_option(option, value, self.correct_answers, self.user_answers)
+        return option
 
 
 # Формы для пошагового прохождения опроса
@@ -222,76 +87,129 @@ class SurveyIntroForm(forms.Form):
 class QuestionAnswerForm(forms.Form):
     """Форма для ответа на вопрос"""
 
-    def __init__(self, question, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, question, response=None, survey=None, current_question_index=None, *args, **kwargs):
         self.question = question
+        self.response: Response = response
+        self.survey = survey
+        self.current_question_index = current_question_index
+        self.show_correct_answer = kwargs.pop("show_correct_answer", False)
+        self.correct_answer = kwargs.pop("correct_answer", None)
+        self.read_only = kwargs.pop("read_only", False)
+
+        # Автоматически включаем read-only режим, если передан корректный ответ
+        if self.correct_answer and not self.read_only:
+            self.read_only = True
+
+        self.question_answers = []
+        self.user_answers = []
+        if self.response and self.question.correct_answer:
+            self.question_answers = [choice.strip() for choice in self.question.get_clean_correct_answer()]
+
+        try:
+            existing_answer = Answer.objects.get(response=self.response, question=self.question)
+            self.user_answers = existing_answer.values
+        except Answer.DoesNotExist:
+            pass
+
+        # Создаем виджеты с учетом валидации
+        self.is_correct_answer = set(self.user_answers) == set(self.question_answers)
+        self.has_answer = bool(self.user_answers)
+
+        super().__init__(*args, **kwargs)
         self._build_fields()
 
     def _build_fields(self):
         """Строит поля формы в зависимости от типа вопроса"""
         field_name = f"question_{self.question.id}"
 
-        if self.question.type == Question.TEXT:
-            self.fields[field_name] = forms.CharField(
-                label=self.question.text,
-                widget=forms.Textarea(attrs={"rows": 4, "class": "form-control"}),
-                required=self.question.required,
+        c_payload = {}
+        if self.has_answer:
+            c_payload = {
+                "correct_answers": self.question_answers,
+                "user_answers": self.user_answers,
+            }
+        w_payload = {}
+
+        # if self.read_only:
+        #     w_payload["disabled"] = "disabled"
+        #     w_payload["readonly"] = "readonly"
+
+        # Создаем виджеты с правильными атрибутами
+        widgets = {
+            Question.RADIO: ValidatedRadioSelect(attrs={"class": "form-check-input", **w_payload}, **c_payload),
+            Question.SELECT: ValidatedSelect(attrs={"class": "form-select", **w_payload}, **c_payload),
+            Question.SELECT_MULTIPLE: ValidatedCheckboxSelectMultiple(
+                attrs={"class": "form-check-input", **w_payload}, **c_payload
+            ),
+            Question.TEXT: forms.Textarea(attrs={"rows": 4, "class": "form-control"}),
+            Question.SHORT_TEXT: forms.TextInput(attrs={"class": "form-control"}),
+            Question.INTEGER: forms.NumberInput(attrs={"class": "form-control"}),
+            Question.FLOAT: forms.NumberInput(attrs={"class": "form-control", "step": "0.01"}),
+            Question.DATE: forms.DateInput(attrs={"class": "form-control", "type": "date"}),
+        }
+        widget = widgets.get(self.question.type, forms.TextInput(attrs={"class": "form-control"}))
+
+        fields = {
+            Question.TEXT: forms.CharField,
+            Question.SHORT_TEXT: forms.CharField,
+            Question.RADIO: forms.ChoiceField,
+            Question.SELECT: forms.ChoiceField,
+            Question.SELECT_MULTIPLE: forms.MultipleChoiceField,
+            Question.INTEGER: forms.IntegerField,
+            Question.FLOAT: forms.FloatField,
+            Question.DATE: forms.DateField,
+        }
+
+        field_payload = {}
+        if self.question.type in [Question.RADIO, Question.SELECT, Question.SELECT_MULTIPLE]:
+            field_payload = {
+                "choices": [(choice.strip(), choice.strip()) for choice in self.question.get_clean_choices()],
+            }
+
+        self.fields[field_name] = fields[self.question.type](
+            label=self.question.text,
+            widget=widget,
+            required=self.question.required,
+            **field_payload,
+        )
+
+        # Настраиваем FormHelper для crispy forms
+        self.helper = FormHelper()
+        self.helper.form_method = "post"
+        self.helper.form_class = "space-e"
+        self.helper.form_id = "form-question"
+
+        layout_items = [
+            Field(
+                field_name,
+                css_class=f"form-option-group {'inactive' if self.has_answer else ''}",
+                wrapper_class="input-style-1",
+            ),
+            Div(
+                self._prepare_submit_button(),
+                css_class="mt-4",
+            ),
+        ]
+
+        if self.question.hint and not self.has_answer:
+            layout_items.insert(
+                1,
+                Div(
+                    self._prepare_hint_button(),
+                    css_class="mt-6",
+                ),
             )
-        elif self.question.type == Question.SHORT_TEXT:
-            self.fields[field_name] = forms.CharField(
-                label=self.question.text,
-                widget=forms.TextInput(attrs={"class": "form-control"}),
-                required=self.question.required,
+
+        if self.question.explanation and self.has_answer:
+            layout_items.insert(
+                1,
+                Div(
+                    self._prepare_explanation_button(),
+                    css_class="mt-6",
+                ),
             )
-        elif self.question.type == Question.RADIO:
-            choices = [(choice.strip(), choice.strip()) for choice in self.question.get_clean_choices()]
-            self.fields[field_name] = forms.ChoiceField(
-                label=self.question.text,
-                choices=choices,
-                widget=forms.RadioSelect(attrs={"class": "form-check-input"}),
-                required=self.question.required,
-            )
-        elif self.question.type == Question.SELECT:
-            choices = [(choice.strip(), choice.strip()) for choice in self.question.get_clean_choices()]
-            self.fields[field_name] = forms.ChoiceField(
-                label=self.question.text,
-                choices=choices,
-                widget=forms.Select(attrs={"class": "form-select"}),
-                required=self.question.required,
-            )
-        elif self.question.type == Question.SELECT_MULTIPLE:
-            choices = [(choice.strip(), choice.strip()) for choice in self.question.get_clean_choices()]
-            self.fields[field_name] = forms.MultipleChoiceField(
-                label=self.question.text,
-                choices=choices,
-                widget=forms.CheckboxSelectMultiple(attrs={"class": "form-check-input"}),
-                required=self.question.required,
-            )
-        elif self.question.type == Question.INTEGER:
-            self.fields[field_name] = forms.IntegerField(
-                label=self.question.text,
-                widget=forms.NumberInput(attrs={"class": "form-control"}),
-                required=self.question.required,
-            )
-        elif self.question.type == Question.FLOAT:
-            self.fields[field_name] = forms.FloatField(
-                label=self.question.text,
-                widget=forms.NumberInput(attrs={"class": "form-control", "step": "0.01"}),
-                required=self.question.required,
-            )
-        elif self.question.type == Question.DATE:
-            self.fields[field_name] = forms.DateField(
-                label=self.question.text,
-                widget=forms.DateInput(attrs={"class": "form-control", "type": "date"}),
-                required=self.question.required,
-            )
-        else:
-            # По умолчанию текстовое поле
-            self.fields[field_name] = forms.CharField(
-                label=self.question.text,
-                widget=forms.TextInput(attrs={"class": "form-control"}),
-                required=self.question.required,
-            )
+
+        self.helper.layout = Layout(*layout_items)
 
     def get_answer_value(self):
         """Возвращает значение ответа в правильном формате"""
@@ -308,3 +226,90 @@ class QuestionAnswerForm(forms.Form):
             return [value] if value else []
 
         return value
+
+    def _prepare_hint_button(self):
+        """Создает кнопку с аккордеоном для отображения подсказки вопроса"""
+        return self._prepare_spoiler_button(_("Hint"), "hint", "ti ti-bell")
+
+    def _prepare_explanation_button(self):
+        """Создает кнопку с аккордеоном для отображения объяснения вопроса"""
+        return self._prepare_spoiler_button(
+            _("Explanation"),
+            "explanation",
+            "ti ti-help-circle",
+            collapsed=self.is_correct_answer,
+        )
+
+    def _prepare_submit_button(self):
+        if self.has_answer and self.current_question_index == self.survey.total_questions:
+            button_text = _("Finish survey and go to results")
+            next_url = self.response.get_absolute_url()
+            submit_button = Button(
+                "finish_survey",
+                button_text,
+                css_class="btn btn-success btn-lg w-100",
+                onclick=f"window.location.href='{next_url}'",
+                css_id="finish-survey-btn",
+            )
+        elif not self.has_answer:
+            button_text = _("Check your answer")
+            submit_button = Submit(
+                "action_add",
+                button_text,
+                css_class="btn btn-primary btn-lg w-100",
+                css_id="submit-answer-btn",
+            )
+        elif self.has_answer:
+            button_text = _("Next question")
+            next_url = reverse("survey:question-detail", kwargs={"survey_id": self.survey.id}) + "?next=true"
+            submit_button = Button(
+                "next_question",
+                button_text,
+                css_class="btn btn-success btn-lg w-100",
+                onclick=f"window.location.href='{next_url}'",
+                css_id="next-question-btn",
+            )
+
+        return submit_button
+
+    def _prepare_spoiler_button(self, name: str, field: str, icon: str, collapsed: bool = True):
+        content = getattr(self.question, field)
+        accordion_id = f"accordion-{field}"
+        element_id = f"{field}-{self.question.id}"
+
+        # TODO добавить логику скрытия/открытия по умолчанию
+
+        element = f"""
+        <div class="accordion markdown" id="{accordion_id}">
+            <div class="accordion-item">
+
+                <div class="accordion-header">
+
+                    <button
+                        class="btn btn-ghost btn-secondary w-100 d-flex align-items-center"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#{element_id}"
+                        aria-expanded="false"
+                        aria-controls="{element_id}">
+                        <span class="d-flex align-items-center">
+                            <i class="icon {icon} me-2"></i>{name}
+                        </span>
+                    </button>
+
+                </div>
+
+                <div
+                    id="{element_id}"
+                    class="accordion-collapse collapse {"show" if not collapsed else ""}"
+                    data-bs-parent="#{accordion_id}">
+
+                    <div class="accordion-body mt-3">{content}</div>
+
+                </div>
+
+            </div>
+        </div>
+        """
+
+        return HTML(element)

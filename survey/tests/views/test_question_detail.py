@@ -282,3 +282,166 @@ class TestQuestionDetailView:
 
         response = client.get(reverse("survey:question-detail", kwargs={"survey_id": survey.id}))
         assert "survey/question_detail.html" in [t.name for t in response.templates]
+
+
+@pytest.mark.django_db
+class TestQuestionDetailViewCorrectAnswerDisplay:
+    """Тесты для проверки отображения правильного ответа в форме"""
+
+    def test_form_shows_correct_answer_after_submission(self, client):
+        """Тест: форма показывает правильный ответ после отправки"""
+        from survey.models import Question
+
+        survey = SurveyFactory()
+        QuestionFactory(
+            survey=survey,
+            type=Question.RADIO,
+            choices="Вариант 1, Вариант 2, Вариант 3",
+            correct_answer="Вариант 2",
+            order=1,
+        )
+
+        # Начинаем опрос - создаем сессию
+        response = client.post(
+            reverse("survey:survey-detail", kwargs={"survey_id": survey.id}), data={"start_survey": True}
+        )
+
+        # Отвечаем на вопрос
+        response = client.post(
+            reverse("survey:question-detail", kwargs={"survey_id": survey.id}),
+            data={"question_1": "Вариант 1"},  # Неправильный ответ
+        )
+
+        # Проверяем что страница отображается (не редирект)
+        assert response.status_code == 200
+
+        # Проверяем что форма в read-only режиме (правильный ответ показан)
+        content = response.content.decode()
+        assert "form-check-input" in content  # Поля формы присутствуют
+        assert "answer-invalid" in content or "answer-valid" in content  # Валидация ответов
+
+    def test_form_does_not_show_correct_answer_before_submission(self, client):
+        """Тест: форма не показывает правильный ответ до отправки"""
+        from survey.models import Question
+
+        survey = SurveyFactory()
+        QuestionFactory(
+            survey=survey, type=Question.RADIO, choices="Вариант 1, Вариант 2", correct_answer="Вариант 2", order=1
+        )
+
+        # Начинаем опрос - создаем сессию
+        client.post(reverse("survey:survey-detail", kwargs={"survey_id": survey.id}), data={"start_survey": True})
+
+        # Получаем страницу вопроса
+        response = client.get(reverse("survey:question-detail", kwargs={"survey_id": survey.id}))
+
+        # Проверяем что страница отображается
+        assert response.status_code == 200
+
+        # Проверяем что форма не в read-only режиме (правильный ответ не показан)
+        content = response.content.decode()
+        assert "form-check-input" in content  # Поля формы присутствуют
+        assert "answer-invalid" not in content  # Валидация ответов отсутствует
+        assert "answer-valid" not in content
+
+    def test_crispy_forms_integration(self, client):
+        """Тест: интеграция с crispy forms работает корректно"""
+        survey = SurveyFactory()
+        QuestionFactory(survey=survey, order=1)
+
+        # Начинаем опрос - создаем сессию
+        client.post(reverse("survey:survey-detail", kwargs={"survey_id": survey.id}), data={"start_survey": True})
+
+        # Получаем страницу вопроса
+        response = client.get(reverse("survey:question-detail", kwargs={"survey_id": survey.id}))
+
+        # Проверяем что форма рендерится с crispy forms
+        content = response.content.decode()
+        # Проверяем наличие формы и полей
+        assert "form" in content
+        assert "question_1" in content
+        # Проверяем что используется crispy forms
+        assert "form-control" in content
+
+    def test_correct_answer_display_for_different_question_types(self, client):
+        """Тест: правильный ответ отображается для разных типов вопросов"""
+        from survey.models import Question
+
+        survey = SurveyFactory()
+        QuestionFactory(
+            survey=survey,
+            type=Question.SELECT_MULTIPLE,
+            choices="Опция 1, Опция 2, Опция 3",
+            correct_answer="Опция 1, Опция 3",
+            order=1,
+        )
+
+        # Начинаем опрос - создаем сессию
+        client.post(reverse("survey:survey-detail", kwargs={"survey_id": survey.id}), data={"start_survey": True})
+
+        # Отвечаем на вопрос с множественным выбором
+        response = client.post(
+            reverse("survey:question-detail", kwargs={"survey_id": survey.id}),
+            data={"question_1": ["Опция 1", "Опция 2"]},  # Частично правильный ответ
+        )
+
+        # Проверяем что страница отображается (не редирект)
+        assert response.status_code == 200
+
+        # Проверяем что форма в read-only режиме с валидацией
+        content = response.content.decode()
+        assert "form-check-input" in content
+        assert "answer-invalid" in content or "answer-valid" in content
+
+    def test_form_context_has_correct_answer_after_post(self, client):
+        """Тест: контекст содержит правильный ответ после POST запроса"""
+        from survey.models import Question
+
+        survey = SurveyFactory()
+        QuestionFactory(
+            survey=survey,
+            type=Question.RADIO,
+            choices="Вариант 1, Вариант 2",
+            correct_answer="Вариант 2",
+            order=1,
+        )
+
+        # Начинаем опрос
+        client.post(reverse("survey:survey-detail", kwargs={"survey_id": survey.id}), data={"start_survey": True})
+
+        # Отвечаем на вопрос
+        response = client.post(
+            reverse("survey:question-detail", kwargs={"survey_id": survey.id}),
+            data={"question_1": "Вариант 1"},
+        )
+
+        # Проверяем что контекст содержит правильный ответ
+        assert response.status_code == 200
+        # Проверяем что форма показывает правильный ответ через CSS классы
+        content = response.content.decode()
+        assert "answer-valid" in content or "answer-invalid" in content
+
+    def test_form_context_no_correct_answer_before_post(self, client):
+        """Тест: контекст не содержит правильный ответ до POST запроса"""
+        from survey.models import Question
+
+        survey = SurveyFactory()
+        QuestionFactory(
+            survey=survey,
+            type=Question.RADIO,
+            choices="Вариант 1, Вариант 2",
+            correct_answer="Вариант 2",
+            order=1,
+        )
+
+        # Начинаем опрос
+        client.post(reverse("survey:survey-detail", kwargs={"survey_id": survey.id}), data={"start_survey": True})
+
+        # Получаем страницу вопроса
+        response = client.get(reverse("survey:question-detail", kwargs={"survey_id": survey.id}))
+
+        # Проверяем что контекст не содержит правильный ответ
+        assert response.status_code == 200
+        content = response.content.decode()
+        assert "answer-valid" not in content
+        assert "answer-invalid" not in content

@@ -71,6 +71,7 @@ class ResponseDetailView(View):
             "answers_data": answers_data,
             "correct_answers": response.correct_answers_count,
             "correct_percentage": response.correct_answers_percentage,
+            "incorrect_percentage": 100 - response.correct_answers_percentage,
         }
 
     def _clear_session(self, request):

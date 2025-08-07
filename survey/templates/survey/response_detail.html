@@ -1,200 +1,130 @@
 {% extends "survey/base.html" %}
 {% load i18n %}
 
-{% block title %}{{ survey.name }} - {% trans "Результаты" %}{% endblock %}
+{% block title %}{{ survey.name }} - {% trans "Results" %}{% endblock %}
 
 {% block body %}
-<div class="container mt-4">
-    <div class="row justify-content-center">
-        <div class="col-md-10">
-            <!-- Заголовок -->
-            <div class="card mb-4">
-                <div class="card-header bg-success text-white">
-                    <h2 class="mb-0">
-                        <i class="fas fa-trophy me-2"></i>{% trans "Опрос завершен!" %}
-                    </h2>
-                </div>
-                <div class="card-body">
-                    <h3>{{ survey.name }}</h3>
-                    <p class="text-muted">{{ survey.description|truncatewords:30 }}</p>
-                </div>
-            </div>
 
-            <!-- Общая статистика -->
-            <div class="row mb-4">
-                <div class="col-md-4">
-                    <div class="card text-center">
-                        <div class="card-body">
-                            <h5 class="card-title">{% trans "Всего вопросов" %}</h5>
-                            <p class="display-4 text-primary">{{ survey.total_questions }}</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card text-center">
-                        <div class="card-body">
-                            <h5 class="card-title">{% trans "Правильных ответов" %}</h5>
-                            <p class="display-4 text-success">{{ correct_answers }}</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card text-center">
-                        <div class="card-body">
-                            <h5 class="card-title">{% trans "Процент правильных" %}</h5>
-                            <p class="display-4 text-info">{{ correct_percentage }}%</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+
+    <!-- Упрощенный заголовок с результатом -->
+    <div class="row justify-content-center">
+        <div class="col-md-8 text-center">
+            <h1 class="display-5 mb-4">{% trans "Your score" %}: {{ correct_percentage }}%</h1>
 
             <!-- Прогресс бар результата -->
-            <div class="card mb-4">
-                <div class="card-body">
-                    <h5 class="card-title">{% trans "Общий результат" %}</h5>
-                    <div class="progress" style="height: 25px;">
-                        <div class="progress-bar bg-success" role="progressbar"
-                             style="width: {{ correct_percentage }}%"
-                             aria-valuenow="{{ correct_percentage }}"
-                             aria-valuemin="0" aria-valuemax="100">
-                            {{ correct_percentage }}%
-                        </div>
-                    </div>
+            <div class="progress progress-separated mb-3" style="height: 30px;">
+                <div
+                    class="progress-bar bg-success"
+                    role="progressbar"
+                    style="width: {{ correct_percentage }}%"
+                        aria-label="{% trans "Correct" %}">
+                    <i class="ti ti-check display-7"></i>
                 </div>
-            </div>
-
-            <!-- Детальные результаты -->
-            <div class="card">
-                <div class="card-header">
-                    <h4 class="mb-0">{% trans "Детальные результаты" %}</h4>
+                <div
+                    class="progress-bar bg-danger"
+                    role="progressbar"
+                    style="width: {{ incorrect_percentage }}%"
+                    aria-label="{% trans "Incorrect" %}">
+                    <i class="ti ti-x display-7"></i>
                 </div>
-                <div class="card-body">
-                    {% for answer_data in answers_data %}
-                    <div class="answer-item mb-4 p-3 border rounded">
-                        <div class="row">
-                            <div class="col-md-8">
-                                <h5 class="question-number">{% trans "Вопрос" %} {{ forloop.counter }}</h5>
-                                <p class="question-text">{{ answer_data.question.text }}</p>
+                </div>
 
-                                <div class="answer-section">
-                                    <strong>{% trans "Ваш ответ:" %}</strong>
-                                    <p class="user-answer {% if answer_data.is_correct %}text-success{% else %}text-danger{% endif %}">
-                                        {{ answer_data.answer.display_value|default:"Не отвечено" }}
-                                    </p>
-                                </div>
 
-                                {% if answer_data.correct_answer %}
-                                <div class="correct-answer-section">
-                                    <strong>{% trans "Правильный ответ:" %}</strong>
-                                    <p class="correct-answer text-success">{{ answer_data.correct_answer }}</p>
-                                </div>
-                                {% endif %}
+            <!-- Краткое описание результата -->
+            <p class="mb-4">
+                {% trans "Your result is " %}  {{ correct_answers }} {% trans "correct answers from" %} {{ survey.total_questions }}.
+            </p>
+
+            {% if survey.gift_after %}
+                <p class="mb-4">
+                    Дарим тебе подарок за прохождение опроса: <a class="btn btn-info" target="_blank" href="{{ survey.gift_after }}">Забрать подарок</a>
+                </p>
+            {% endif %}
+
+        </div>
+    </div>
+
+
+
+    <div class="btn-list justify-content-center">
+        {% if survey.redirect_url %}
+        <a href="{{ survey.redirect_url }}" class="btn btn-success btn-lg">
+            <i class="ti ti-external-link me-2"></i>
+            {% trans "Go to next page" %}
+        </a>
+        {% endif %}
+        <a href="{{ survey.get_absolute_url }}" class="btn btn-danger btn-lg">
+            <i class="ti ti-refresh me-2"></i>
+            {% trans "Repeat the survey" %}
+        </a>
+    </div>
+
+
+
+
+    <!-- Детальные результаты -->
+    <h2 class="display-7 mb-3 mt-4">{% trans "Your answers" %}</h2>
+
+    <div class="row justify-content-center">
+        <div class="col-12">
+            <div class="accordion accordion-tabs" id="answersAccordion" role="tablist" aria-multiselectable="true">
+                {% for answer_data in answers_data %}
+                <div class="accordion-item bg-secondary-lt">
+                    <div class="accordion-header" role="tab">
+                        <button
+                            class="accordion-button {% if answer_data.is_correct %}collapsed{% endif %} d-flex justify-content-between align-items-center"
+                            type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#collapse{{ forloop.counter }}"
+                            aria-expanded="{% if not answer_data.is_correct %}true{% else %}false{% endif %}"
+                            aria-controls="collapse{{ forloop.counter }}"
+                            aria-label="{{ answer_data.question.text|truncatewords:8 }}"
+                        >
+                            <div class="d-flex align-items-center">
+                                <span>{{ answer_data.question.text|truncatewords:12 }}</span>
                             </div>
-                            <div class="col-md-4 text-center">
+
+                            <div class="">
                                 {% if answer_data.is_correct %}
-                                    <div class="result-icon correct">
-                                        <i class="fas fa-check-circle fa-3x text-success"></i>
-                                        <p class="mt-2 text-success">{% trans "Правильно" %}</p>
-                                    </div>
+                                    <span class="badge bg-success text-success-fg mb-2">
+                                        <i class="ti ti-check  icon-tabler"></i>
+                                    </span>
                                 {% else %}
-                                    <div class="result-icon incorrect">
-                                        <i class="fas fa-times-circle fa-3x text-danger"></i>
-                                        <p class="mt-2 text-danger">{% trans "Неправильно" %}</p>
-                                    </div>
+                                    <span class="badge bg-danger text-danger-fg mb-2">
+                                        <i class="ti ti-x  icon-tabler"></i>
+                                    </span>
                                 {% endif %}
                             </div>
+                        </button>
+                    </div>
+
+                    <div id="collapse{{ forloop.counter }}" class="accordion-collapse collapse {% if not answer_data.is_correct %}show{% endif %}" role="tabpanel" data-bs-parent="#answersAccordion">
+                        <div class="accordion-body pt-0">
+
+                            <div class="alert {% if answer_data.is_correct %}alert-success{% else %}alert-danger mb-4{% endif %} py-2 px-3 mb-0">
+                                <strong>{% trans "Your answer:" %}</strong> {{ answer_data.answer.display_value|default:"Not answered" }}
+                            </div>
+                            {% if not answer_data.is_correct %}
+                                <div class="correct-answer-blur" id="correct-answer-{{ forloop.counter }}">
+                                    <div class="position-relative">
+                                        <div class="blur-overlay" onclick="toggleBlur({{ forloop.counter }})">
+                                            <div class="blur-content">
+                                                <i class="ti ti-eye"></i>
+                                                <span>{% trans "Click to see correct answer" %}</span>
+                                            </div>
+                                        </div>
+                                        <div class="alert alert-success py-2 px-3 mb-0">
+                                            <strong>{% trans "Correct answer:" %}</strong> {{ answer_data.correct_answer }}
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endif %}
                         </div>
                     </div>
-                    {% endfor %}
                 </div>
-            </div>
-
-            <!-- Кнопки действий -->
-            <div class="card mt-4">
-                <div class="card-body text-center">
-                    <div class="btn-group" role="group">
-                        <a href="{{ survey.get_absolute_url }}" class="btn btn-primary">
-                            <i class="fas fa-redo me-2"></i>{% trans "Пройти опрос снова" %}
-                        </a>
-                        <a href="{% url 'survey:survey-list' %}" class="btn btn-secondary">
-                            <i class="fas fa-list me-2"></i>{% trans "К списку опросов" %}
-                        </a>
-                        {% if survey.redirect_url %}
-                        <a href="{{ survey.redirect_url }}" class="btn btn-success">
-                            <i class="fas fa-external-link-alt me-2"></i>{% trans "Перейти по ссылке" %}
-                        </a>
-                        {% endif %}
-                    </div>
-                </div>
+                {% endfor %}
             </div>
         </div>
     </div>
-</div>
 
-<style>
-.answer-item {
-    background-color: #f8f9fa;
-    transition: all 0.2s ease;
-}
-
-.answer-item:hover {
-    background-color: #e9ecef;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-}
-
-.question-number {
-    color: #495057;
-    font-weight: 600;
-}
-
-.question-text {
-    color: #2c3e50;
-    font-weight: 500;
-    line-height: 1.6;
-}
-
-.user-answer {
-    background-color: #fff;
-    padding: 8px 12px;
-    border-radius: 4px;
-    border-left: 4px solid;
-}
-
-.user-answer.text-success {
-    border-left-color: #28a745;
-}
-
-.user-answer.text-danger {
-    border-left-color: #dc3545;
-}
-
-.correct-answer {
-    background-color: #d4edda;
-    padding: 8px 12px;
-    border-radius: 4px;
-    border-left: 4px solid #28a745;
-}
-
-.result-icon {
-    padding: 20px;
-    border-radius: 8px;
-    background-color: #fff;
-}
-
-.progress {
-    border-radius: 15px;
-}
-
-.progress-bar {
-    border-radius: 15px;
-    font-weight: 600;
-    font-size: 14px;
-    line-height: 25px;
-}
-
-.btn-group .btn {
-    margin: 0 5px;
-}
-</style>
 {% endblock body %}

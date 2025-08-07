@@ -21,7 +21,7 @@ class SurveyDetailView(FormView):
 
         # Проверяем доступность опроса
         if not self.survey.is_published:
-            raise Http404(_("Опрос недоступен"))
+            raise Http404(_("Survey is not available"))
 
         if self.survey.need_logged_user and not request.user.is_authenticated:
             return redirect("login")
